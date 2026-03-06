@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FloatingInput from './components/FloatingInput';
 import BrandGrid, { BRANDS } from './components/BrandGrid';
 import VariantSelect from './components/VariantSelect';
@@ -6,7 +6,17 @@ import './App.css';
 
 const defaultBrand = BRANDS.find(b => b.id === 'audi');
 
-function AppButton({ children, primary }) {
+function useWindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return width;
+}
+
+function AppButton({ children, primary, fullWidth }) {
   const [hovered, setHovered] = useState(false);
 
   const base = {
@@ -14,6 +24,7 @@ function AppButton({ children, primary }) {
     fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 10,
     letterSpacing: 1.2, textTransform: 'uppercase', color: '#ccdfe9',
     cursor: 'pointer', transition: 'background 0.15s, box-shadow 0.15s, border-color 0.15s',
+    ...(fullWidth ? { flex: 1 } : {}),
   };
 
   const style = primary
@@ -45,10 +56,68 @@ function AppButton({ children, primary }) {
 export default function App() {
   const [activeBrand, setActiveBrand] = useState(defaultBrand);
   const [selectedVariant, setSelectedVariant] = useState(defaultBrand.variants[0]);
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth < 560;
 
   function handleBrandSelect(brand) {
     setActiveBrand(brand);
     setSelectedVariant(brand.variants[0]);
+  }
+
+  if (isMobile) {
+    return (
+      <div style={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 28,
+        paddingTop: 48,
+        paddingBottom: 32,
+      }}>
+
+        {/* Title */}
+        <div style={{ textAlign: 'center', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, padding: '0 16px' }}>
+          <div style={{ fontSize: 34, letterSpacing: 0.853, color: '#ffffff', lineHeight: 1.3 }}>
+            CMT
+          </div>
+          <div style={{ fontSize: 20, letterSpacing: 6, color: '#ccdfe9', opacity: 0.5, lineHeight: 1.3, paddingLeft: 8 }}>
+            PRO
+          </div>
+        </div>
+
+        {/* Form */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+          {/* Inputs stacked */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 16px' }}>
+            <FloatingInput label="User" type="text" />
+            <FloatingInput label="Password" type="password" />
+          </div>
+
+          {/* Brand grid — 2 columns, full width */}
+          <div style={{ padding: '0 16px' }}>
+            <BrandGrid selected={activeBrand.id} onSelect={handleBrandSelect} cols={2} cardHeight={90} logoScale={0.9} />
+          </div>
+
+          {/* Variant dropdown */}
+          <div style={{ padding: '0 16px' }}>
+            <VariantSelect
+              brandName={activeBrand.name}
+              variants={activeBrand.variants}
+              selected={selectedVariant}
+              onSelect={setSelectedVariant}
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', gap: 8, padding: '0 16px' }}>
+          <AppButton fullWidth>Help</AppButton>
+          <AppButton primary fullWidth>Login</AppButton>
+        </div>
+
+      </div>
+    );
   }
 
   return (

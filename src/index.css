@@ -9,3 +9,13 @@ body {
   background-color: #003050;
   font-family: 'Inter', sans-serif;
 }
+
+@media (max-width: 559px) {
+  body {
+    align-items: flex-start;
+    padding: 0;
+  }
+  #root {
+    width: 100%;
+  }
+}

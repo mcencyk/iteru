@@ -12,7 +12,7 @@ const BRANDS = [
 
 const base = import.meta.env.BASE_URL;
 
-function BrandCard({ brand, active, onSelect }) {
+function BrandCard({ brand, active, onSelect, cardHeight, logoScale }) {
   const [hovered, setHovered] = useState(false);
 
   let border, background, boxShadow;
@@ -30,15 +30,19 @@ function BrandCard({ brand, active, onSelect }) {
     boxShadow = '0px 0px 2px 0px rgba(0,0,0,0.24)';
   }
 
+  const scale = logoScale ?? 1;
+
   return (
     <div
       style={{
-        flex: 1, height: 94,
+        flex: 1, height: cardHeight ?? 94,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '12px 16px',
         borderRadius: 16, border, background, boxShadow,
         cursor: 'pointer',
         transition: 'border-color 0.15s, background 0.15s, box-shadow 0.15s',
         position: 'relative', overflow: 'hidden',
+        boxSizing: 'border-box',
       }}
       onClick={() => onSelect(brand)}
       onMouseEnter={() => setHovered(true)}
@@ -48,8 +52,8 @@ function BrandCard({ brand, active, onSelect }) {
         src={base + brand.logo}
         alt={brand.name}
         style={{
-          maxWidth: brand.logoSize.maxWidth,
-          maxHeight: brand.logoSize.maxHeight,
+          maxWidth: Math.round(brand.logoSize.maxWidth * scale),
+          maxHeight: Math.round(brand.logoSize.maxHeight * scale),
           width: '100%',
           height: '100%',
           objectFit: 'contain',
@@ -60,8 +64,11 @@ function BrandCard({ brand, active, onSelect }) {
   );
 }
 
-export default function BrandGrid({ selected, onSelect }) {
-  const rows = [BRANDS.slice(0, 3), BRANDS.slice(3, 6)];
+export default function BrandGrid({ selected, onSelect, cardHeight, cols = 3, logoScale }) {
+  const rows = [];
+  for (let i = 0; i < BRANDS.length; i += cols) {
+    rows.push(BRANDS.slice(i, i + cols));
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -73,6 +80,8 @@ export default function BrandGrid({ selected, onSelect }) {
               brand={brand}
               active={selected === brand.id}
               onSelect={onSelect}
+              cardHeight={cardHeight}
+              logoScale={logoScale}
             />
           ))}
         </div>
