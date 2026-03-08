@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import FloatingInput from './components/FloatingInput';
 import BrandGrid, { BRANDS } from './components/BrandGrid';
 import VariantSelect from './components/VariantSelect';
+import DashboardView from './components/DashboardView';
 import './App.css';
 
 const defaultBrand = BRANDS.find(b => b.id === 'audi');
@@ -16,7 +17,7 @@ function useWindowWidth() {
   return width;
 }
 
-function AppButton({ children, primary, fullWidth }) {
+function AppButton({ children, primary, fullWidth, onClick }) {
   const [hovered, setHovered] = useState(false);
 
   const base = {
@@ -45,6 +46,7 @@ function AppButton({ children, primary, fullWidth }) {
   return (
     <button
       style={style}
+      onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -54,10 +56,15 @@ function AppButton({ children, primary, fullWidth }) {
 }
 
 export default function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
   const [activeBrand, setActiveBrand] = useState(defaultBrand);
   const [selectedVariant, setSelectedVariant] = useState(defaultBrand.variants[0]);
   const windowWidth = useWindowWidth();
   const isMobile = windowWidth < 560;
+
+  if (loggedIn) {
+    return <DashboardView onLogout={() => setLoggedIn(false)} />;
+  }
 
   function handleBrandSelect(brand) {
     setActiveBrand(brand);
@@ -113,7 +120,7 @@ export default function App() {
         {/* Footer */}
         <div style={{ display: 'flex', gap: 8, padding: '0 16px' }}>
           <AppButton fullWidth>Help</AppButton>
-          <AppButton primary fullWidth>Login</AppButton>
+          <AppButton primary fullWidth onClick={() => setLoggedIn(true)}>Login</AppButton>
         </div>
 
       </div>
@@ -170,7 +177,7 @@ export default function App() {
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <AppButton>Help</AppButton>
-          <AppButton primary>Login</AppButton>
+          <AppButton primary onClick={() => setLoggedIn(true)}>Login</AppButton>
         </div>
       </div>
 

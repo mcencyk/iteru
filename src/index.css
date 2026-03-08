@@ -10,6 +10,25 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
+.dashboard-search::placeholder {
+  color: rgba(128, 176, 200, 0.45);
+  font-weight: 400;
+}
+
+.filter-panel-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.32s ease;
+}
+
+.filter-panel-wrapper.open {
+  grid-template-rows: 1fr;
+}
+
+.filter-panel-inner {
+  overflow: hidden;
+}
+
 @media (max-width: 559px) {
   body {
     align-items: flex-start;
