@@ -228,7 +228,7 @@ function FilterPanel({ filters, onChange, activeFilterCount }) {
   return (
     <div style={{
       display: 'flex', gap: 24, padding: '12px 16px',
-      background: 'rgba(0,30,45,0.5)', borderBottom: '1px solid #153f53',
+      background: 'rgba(0,16,26,0.72)', borderBottom: '1px solid #153f53',
       flexWrap: 'wrap', alignItems: 'flex-start',
     }}>
       {/* Status */}

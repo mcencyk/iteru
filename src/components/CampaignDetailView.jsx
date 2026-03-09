@@ -246,7 +246,6 @@ function VehicleBar({ totalVehicles }) {
         {VEHICLE_SEGMENTS.map((seg, i) => {
           const count = Math.round(total * seg.pct / 100);
           const isHovered = hoveredSeg === i;
-          const isSelected = selectedSeg === i;
           const activeHighlight = hoveredSeg !== null ? hoveredSeg : selectedSeg;
           const isDimmed = activeHighlight !== null && activeHighlight !== i;
           const isFirst = i === 0;
@@ -423,11 +422,12 @@ function BottomTab({ label, active, onClick }) {
   );
 }
 
-function IconBtn({ children, tooltip, danger }) {
+function IconBtn({ children, tooltip, danger, onClick }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div style={{ position: 'relative' }}>
       <button
+        onClick={onClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
@@ -456,6 +456,180 @@ function IconBtn({ children, tooltip, danger }) {
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Configure overlay ────────────────────────────────────────────────────────
+const CONFIGURE_PARAMS = {
+  PRIMARY: [
+    { label: 'Flash Duration HV',        value: '102', unit: 'sec.' },
+    { label: 'Flash Duration LV',        value: '102', unit: 'sec.' },
+    { label: 'Flash Duration HMI',       value: '4',   unit: 'min.' },
+    { label: 'Enabled Power Grid',       value: '2',   unit: ''     },
+    { label: 'Current Consumption HV',   value: '10',  unit: 'amp.' },
+    { label: 'Current Consumption LV',   value: '10',  unit: 'amp.' },
+    { label: 'Block Flash Attempts',     value: '3',   unit: ''     },
+    { label: 'Flash Process Repeat',     value: '2',   unit: ''     },
+    { label: 'Repeat',                   value: '6',   unit: ''     },
+    { label: 'Retry',                    value: '3',   unit: ''     },
+    { label: 'Max Retry Number',         value: '5',   unit: ''     },
+    { label: 'Time Delay General',       value: '5',   unit: 'sec.' },
+    { label: 'Time Delay Start 1',       value: '600', unit: 'sec.' },
+    { label: 'Time Delay Start 2',       value: '120', unit: 'sec.' },
+    { label: 'Time Delay Wait For Sleep',value: '30',  unit: 'sec.' },
+    { label: 'Log Level',                value: '7',   unit: ''     },
+    { label: 'Installation Failure Action', value: 'Continue', unit: '' },
+  ],
+  SECONDARY: [
+    { label: 'Fallback Timeout',         value: '60',  unit: 'sec.' },
+    { label: 'Retry Interval',           value: '15',  unit: 'sec.' },
+    { label: 'Max Parallel Sessions',    value: '8',   unit: ''     },
+    { label: 'Session Timeout',          value: '300', unit: 'sec.' },
+    { label: 'Heartbeat Interval',       value: '30',  unit: 'sec.' },
+    { label: 'Diagnostic Level',         value: '2',   unit: ''     },
+    { label: 'Log Retention',            value: '14',  unit: 'days' },
+    { label: 'Error Threshold',          value: '5',   unit: '%'    },
+    { label: 'Priority Level',           value: '3',   unit: ''     },
+    { label: 'Notification Mode',        value: 'Push', unit: ''    },
+  ],
+};
+
+function ParamField({ label, value, unit }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'relative',
+        background: hovered ? 'rgba(0,70,100,0.25)' : 'rgba(0,40,60,0.5)',
+        border: `1px solid ${hovered ? '#1e6080' : '#0e3a52'}`,
+        borderRadius: 10, padding: '8px 12px',
+        display: 'flex', flexDirection: 'column', gap: 3,
+        transition: 'background 0.15s, border-color 0.15s',
+        cursor: 'default',
+      }}
+    >
+      <span style={{ fontSize: 9, fontWeight: 600, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter', sans-serif", letterSpacing: 0.4 }}>
+        {label}
+      </span>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: '#ffffff', fontFamily: "'Inter', sans-serif" }}>
+          {value}
+        </span>
+        {unit && (
+          <span style={{ fontSize: 9, fontWeight: 600, color: 'rgba(128,176,200,0.45)', fontFamily: "'Inter', sans-serif" }}>
+            {unit}
+          </span>
+        )}
+      </div>
+      {hovered && (
+        <div style={{
+          position: 'absolute', bottom: 'calc(100% + 7px)', left: '50%', transform: 'translateX(-50%)',
+          background: '#012d42', border: '1px solid #153f53', borderRadius: 8,
+          padding: '6px 10px', whiteSpace: 'nowrap', zIndex: 10, pointerEvents: 'none',
+          fontSize: 10, fontWeight: 500, color: 'rgba(204,223,233,0.85)', fontFamily: "'Inter', sans-serif",
+          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+        }}>
+          Tooltip that describes this parameter
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ConfigureOverlay({ onClose }) {
+  const [closing, setClosing] = useState(false);
+  const [activeTab, setActiveTab] = useState('PRIMARY');
+
+  function handleClose() { setClosing(true); }
+
+  const params = CONFIGURE_PARAMS[activeTab];
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div onClick={handleClose} style={{ position: 'absolute', inset: 0, zIndex: 99 }} />
+      {/* Panel */}
+      <div
+        onAnimationEnd={() => { if (closing) onClose(); }}
+        style={{
+          position: 'absolute',
+          bottom: 72,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 540,
+          height: 520,
+          background: 'rgba(1,45,66,0.82)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid #153f53',
+          borderRadius: 24,
+          boxShadow: '0px 0px 12px 0px rgba(0,0,0,0.24), 0 24px 64px rgba(0,0,0,0.5)',
+          animation: closing ? 'panelFadeOut 0.18s ease forwards' : 'panelFadeIn 0.22s ease',
+          padding: '24px',
+          display: 'flex', flexDirection: 'column', gap: 20,
+          zIndex: 100,
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <span style={{ fontSize: 20, fontWeight: 700, color: '#ffffff', fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.3 }}>
+            Campaign Parameters
+          </span>
+          <button
+            onClick={handleClose}
+            style={{
+              width: 28, height: 28, borderRadius: 8, border: '1px solid #1e5068',
+              background: 'rgba(255,255,255,0.06)', color: 'rgba(128,176,200,0.7)',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 0, transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = '#ccdfe9'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(128,176,200,0.7)'; }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div style={{
+          display: 'flex', background: 'rgba(0,20,32,0.6)', border: '1px solid #0e3a52',
+          borderRadius: 12, padding: 4, gap: 4, flexShrink: 0,
+        }}>
+          {['PRIMARY', 'SECONDARY'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                flex: 1, padding: '7px 0', borderRadius: 9, border: 'none',
+                background: activeTab === tab ? 'rgba(0,70,100,0.55)' : 'transparent',
+                color: activeTab === tab ? '#ffffff' : 'rgba(128,176,200,0.5)',
+                fontSize: 10, fontWeight: 700, fontFamily: "'Inter', sans-serif", letterSpacing: 0.8,
+                cursor: 'pointer', transition: 'all 0.15s',
+                outline: activeTab === tab ? '1px solid #1e6080' : 'none',
+              }}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Parameter grid (scrollable) */}
+        <div style={{ overflowY: 'auto', flexShrink: 1, minHeight: 0 }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
+          }}>
+            {params.map((p, i) => (
+              <ParamField key={i} label={p.label} value={p.value} unit={p.unit} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -506,6 +680,7 @@ const LOAD_STEPS_BACK = [
 export default function CampaignDetailView({ campaign, onBack }) {
   const [activeNav, setActiveNav] = useState('aftersales');
   const [activeTab, setActiveTab] = useState('OVERVIEW');
+  const [configureOpen, setConfigureOpen] = useState(false);
   const [loadingBack, setLoadingBack] = useState(false);
   const [loaderVisible, setLoaderVisible] = useState(false);
   const [loadStep, setLoadStep] = useState(0);
@@ -700,10 +875,10 @@ export default function CampaignDetailView({ campaign, onBack }) {
           <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.1)', margin: '0 2px' }} />
 
           {/* Icon buttons */}
-          <IconBtn tooltip="Configure">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          <IconBtn tooltip="Configure" onClick={() => setConfigureOpen(true)}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
             </svg>
           </IconBtn>
           <IconBtn tooltip="Refresh">
@@ -719,6 +894,7 @@ export default function CampaignDetailView({ campaign, onBack }) {
           </IconBtn>
         </div>
 
+        {configureOpen && <ConfigureOverlay onClose={() => setConfigureOpen(false)} />}
       </div>
     </div>
   );
