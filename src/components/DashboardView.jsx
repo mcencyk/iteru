@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Sidebar from './Sidebar';
 import CampaignDetailView from './CampaignDetailView';
 
@@ -39,7 +39,7 @@ const CAMPAIGNS = [
   { id: 23, name: 'Brazil South Fleet Firmware',       vehicles: '264',    code: 'FA01', crit: '01', spec: 'ID_S.3.0.5_K1_V6_0-2_V1_2022-09-02_1455.xlsx', measure: '',                type: 'Partial', date: '07.08.2024', statuses: ['CALCULATED'] },
 ];
 
-const TAB_TOTAL = { all: 23, active: 15, inactive: 8, mine: 6, attention: 2 };
+const TAB_TOTAL = { all: 23, active: 15, inactive: 8, mine: 6, attention: 4 };
 const PER_PAGE = 24;
 
 function buildPages(total) {
@@ -55,15 +55,15 @@ const TAB_FILTER = {
   active:    r => ['RUNNING', 'CALCULATED', 'CREATED'].includes(r.statuses[0]),
   inactive:  r => ['FAILED', 'DRAFT', 'COMPLETED'].includes(r.statuses[0]),
   mine:      r => MINE_IDS.has(r.id),
-  attention: r => r.statuses[0] === 'FAILED',
+  attention: r => ['FAILED', 'CREATED'].includes(r.statuses[0]),
 };
 
 const TABS_TOP = [
   { id: 'all', label: 'ALL', count: 23 },
   { id: 'active', label: 'ACTIVE', count: 15 },
   { id: 'inactive', label: 'INACTIVE', count: 8 },
+  { id: 'attention', label: 'NEED ATTENTION', count: 4 },
   { id: 'mine', label: 'MINE', count: 6 },
-  { id: 'attention', label: 'NEED ATTENTION', count: 2 },
 ];
 
 const TABS_BOTTOM = [
@@ -219,6 +219,52 @@ function TopTab({ tab, active, onClick }) {
   );
 }
 
+// ─── Truncated cell with styled tooltip ──────────────────────────────────────
+function TruncatedCell({ flex, children, fontSize }) {
+  const innerRef = useRef(null);
+  const [tip, setTip] = useState(null);
+
+  function handleMouseEnter() {
+    const el = innerRef.current;
+    if (!el || el.scrollWidth <= el.clientWidth) return;
+    const r = el.getBoundingClientRect();
+    setTip({ x: r.left + r.width / 2, y: r.top });
+  }
+
+  return (
+    <div style={{ flex, minWidth: 0, padding: '0 12px' }}>
+      <div
+        ref={innerRef}
+        style={{
+          fontSize: fontSize ?? 11, fontWeight: 500, color: '#ccdfe9',
+          fontFamily: "'Inter', sans-serif",
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setTip(null)}
+      >
+        {children}
+      </div>
+      {tip && (
+        <div style={{
+          position: 'fixed',
+          top: tip.y - 8, left: tip.x,
+          transform: 'translate(-50%, -100%)',
+          padding: '4px 10px', borderRadius: 6,
+          background: '#012d42', border: '1px solid #153f53',
+          fontSize: 11, fontWeight: 600, color: '#80b0c8',
+          fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
+          pointerEvents: 'none', zIndex: 500,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.28)',
+          animation: 'tooltipFadeIn 0.12s ease forwards',
+        }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Filter panel options ─────────────────────────────────────────────────────
 const FILTER_STATUSES = Object.keys(STATUS);
 const FILTER_TYPES = ['Partial', 'Full'];
@@ -314,7 +360,7 @@ function FilterPanel({ filters, onChange, activeFilterCount }) {
         </div>
       </div>
 
-      {/* Date range + Reset */}
+      {/* Date range */}
       <div>
         <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter',sans-serif", marginBottom: 6, textTransform: 'uppercase' }}>Start Date</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -339,24 +385,27 @@ function FilterPanel({ filters, onChange, activeFilterCount }) {
               fontFamily: "'Inter',sans-serif", outline: 'none', colorScheme: 'dark',
             }}
           />
-          <span
-            onClick={() => activeFilterCount > 0 && onChange({ statuses: [], types: [], codes: [], dateFrom: '', dateTo: '' })}
-            style={{
-              padding: '2px 10px', borderRadius: 6,
-              cursor: activeFilterCount > 0 ? 'pointer' : 'default',
-              background: activeFilterCount > 0 ? 'rgba(180,40,40,0.15)' : 'rgba(255,255,255,0.03)',
-              border: activeFilterCount > 0 ? '1px solid rgba(180,40,40,0.45)' : '1px solid rgba(255,255,255,0.08)',
-              fontSize: 10, fontWeight: 600,
-              color: activeFilterCount > 0 ? '#e06060' : 'rgba(128,176,200,0.25)',
-              fontFamily: "'Inter',sans-serif",
-              transition: 'all 0.15s',
-              userSelect: 'none',
-            }}
-          >
-            Reset
-          </span>
         </div>
       </div>
+
+      {/* Reset — right edge */}
+      <span
+        onClick={() => activeFilterCount > 0 && onChange({ statuses: [], types: [], codes: [], dateFrom: '', dateTo: '' })}
+        style={{
+          marginLeft: 'auto', alignSelf: 'flex-end',
+          padding: '10px 18px', borderRadius: 8,
+          cursor: activeFilterCount > 0 ? 'pointer' : 'default',
+          background: activeFilterCount > 0 ? 'rgba(180,40,40,0.15)' : 'rgba(255,255,255,0.03)',
+          border: activeFilterCount > 0 ? '1px solid rgba(180,40,40,0.45)' : '1px solid rgba(255,255,255,0.08)',
+          fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
+          color: activeFilterCount > 0 ? '#e06060' : 'rgba(128,176,200,0.25)',
+          fontFamily: "'Inter',sans-serif",
+          transition: 'all 0.15s',
+          userSelect: 'none',
+        }}
+      >
+        Reset
+      </span>
     </div>
   );
 }
@@ -368,7 +417,7 @@ const LOAD_STEPS_CAMPAIGN = [
 ];
 
 // ─── Main component ──────────────────────────────────────────────────────────
-export default function DashboardView({ activeBrand, onBrandChange }) {
+export default function DashboardView({ activeBrand, onBrandChange, onLogout }) {
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [loadingCampaign, setLoadingCampaign] = useState(null);
   const [loadStep, setLoadStep] = useState(0);
@@ -518,7 +567,7 @@ export default function DashboardView({ activeBrand, onBrandChange }) {
       padding: 24, gap: 24, boxSizing: 'border-box', overflow: 'hidden',
     }}>
       {/* ── Sidebar ── */}
-      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} attentionCount={TAB_TOTAL.attention} activeBrand={activeBrand} onBrandChange={onBrandChange} />
+      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} attentionCount={TAB_TOTAL.attention} activeBrand={activeBrand} onBrandChange={onBrandChange} onLogout={onLogout} />
 
       {/* ── Main area ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0, position: 'relative' }}>
@@ -538,13 +587,17 @@ export default function DashboardView({ activeBrand, onBrandChange }) {
 
           {/* Top tabs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            {TABS_TOP.map(tab => (
-              <TopTab
-                key={tab.id}
-                tab={tab}
-                active={activeTopTab === tab.id}
-                onClick={() => setActiveTopTab(tab.id)}
-              />
+            {TABS_TOP.map((tab, i) => (
+              <React.Fragment key={tab.id}>
+                {tab.id === 'mine' && (
+                  <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.15)', marginInline: 4 }} />
+                )}
+                <TopTab
+                  tab={tab}
+                  active={activeTopTab === tab.id}
+                  onClick={() => setActiveTopTab(tab.id)}
+                />
+              </React.Fragment>
             ))}
             <div style={{ position: 'relative' }}>
               <button
@@ -730,34 +783,42 @@ export default function DashboardView({ activeBrand, onBrandChange }) {
                 </div>
               </div>
             )}
-            {sortedCampaigns.map((row, i) => (
+            {sortedCampaigns.map((row, i) => {
+              const isCreated = row.statuses[0] === 'CREATED';
+              const baseBg = isCreated
+                ? (i % 2 === 0 ? 'rgba(100,140,165,0.07)' : 'rgba(100,140,165,0.12)')
+                : (i % 2 === 0 ? 'transparent' : 'rgba(0,50,74,0.15)');
+              const hoverBg = isCreated ? 'rgba(100,140,165,0.18)' : 'rgba(0,70,102,0.2)';
+              return (
               <div
                 key={row.id}
                 style={{
                   display: 'flex', alignItems: 'center',
                   height: 32, flexShrink: 0,
                   borderBottom: '1px solid rgba(21,63,83,0.5)',
-                  background: i % 2 === 0 ? 'transparent' : 'rgba(0,50,74,0.15)',
+                  borderLeft: isCreated ? '2px solid rgba(128,176,200,0.35)' : '2px solid transparent',
+                  background: baseBg,
                   cursor: 'pointer',
                   transition: 'background 0.1s',
                 }}
                 onClick={() => handleCampaignOpen(row)}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,70,102,0.2)'}
-                onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'rgba(0,50,74,0.15)'}
+                onMouseEnter={e => e.currentTarget.style.background = hoverBg}
+                onMouseLeave={e => e.currentTarget.style.background = baseBg}
               >
-                <div style={{ ...cell, flex: 3, minWidth: 0 }}>{row.name}</div>
+                <TruncatedCell flex={3}>{row.name}</TruncatedCell>
                 <div style={{ ...cell, flex: 1, minWidth: 0 }}>{row.vehicles}</div>
                 <div style={{ ...cell, flex: 1.2, minWidth: 0 }}>{row.code}</div>
                 <div style={{ ...cell, flex: 1, minWidth: 0 }}>{row.crit}</div>
-                <div style={{ ...cell, flex: 3, minWidth: 0, fontSize: 10 }}>{row.spec || '–'}</div>
-                <div style={{ ...cell, flex: 2.5, minWidth: 0, fontSize: 10 }}>{row.measure || '–'}</div>
+                <TruncatedCell flex={3} fontSize={10}>{row.spec || '–'}</TruncatedCell>
+                <TruncatedCell flex={2.5} fontSize={10}>{row.measure || '–'}</TruncatedCell>
                 <div style={{ ...cell, flex: 1.2, minWidth: 0 }}>{row.type}</div>
                 <div style={{ ...cell, flex: 1.4, minWidth: 0 }}>{row.date}</div>
                 <div style={{ flex: 2, minWidth: 0, padding: '0 8px', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
                   <StatusBadge status={row.statuses[0]} />
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Table footer: row count + pagination */}

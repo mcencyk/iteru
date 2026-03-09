@@ -68,9 +68,35 @@ body {
   to   { opacity: 0; transform: translateY(-6px) scaleY(0.94); transform-origin: top; }
 }
 
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)) scale(0.97); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes modalFadeOut {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to   { opacity: 0; transform: translate(-50%, calc(-50% + 10px)) scale(0.97); }
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes backdropFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
 @keyframes tooltipFadeIn {
   from { opacity: 0; transform: translateX(-50%) translateY(4px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes queuedPop {
+  0%   { transform: scale(0.65); opacity: 0.3; }
+  60%  { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); }
 }
 
 @keyframes tooltipFadeInRight {

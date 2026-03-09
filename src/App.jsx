@@ -20,6 +20,12 @@ const SWITCH_STEPS = [
   'Preparing dashboard',
 ];
 
+const LOGOUT_STEPS = [
+  'Saving session data',
+  'Closing active connections',
+  'Terminating session',
+];
+
 function LoaderScreen({ step, visible, steps = LOAD_STEPS }) {
   return (
     <div style={{
@@ -115,6 +121,9 @@ export default function App() {
   const [switchingTenant, setSwitchingTenant] = useState(false);
   const [switchLoaderVisible, setSwitchLoaderVisible] = useState(false);
   const [switchLoadStep, setSwitchLoadStep] = useState(0);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutLoaderVisible, setLogoutLoaderVisible] = useState(false);
+  const [logoutLoadStep, setLogoutLoadStep] = useState(0);
 
   function handleBrandChange(newBrand) {
     setDashVisible(false);
@@ -132,6 +141,21 @@ export default function App() {
       }, 1800);
     }, 350);
   }
+  function handleLogout() {
+    setLoggingOut(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setLogoutLoaderVisible(true)));
+    setTimeout(() => setLogoutLoadStep(1), 500);
+    setTimeout(() => setLogoutLoadStep(2), 1100);
+    setTimeout(() => setLogoutLoaderVisible(false), 1700);
+    setTimeout(() => {
+      setLoggedIn(false);
+      setLoggingOut(false);
+      setLogoutLoadStep(0);
+      setDashVisible(false);
+      setLoginVisible(true);
+    }, 2100);
+  }
+
   const windowWidth = useWindowWidth();
   const isMobile = windowWidth < 560;
 
@@ -160,6 +184,14 @@ export default function App() {
     );
   }
 
+  if (loggingOut) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100vw', height: '100vh' }}>
+        <LoaderScreen step={logoutLoadStep} visible={logoutLoaderVisible} steps={LOGOUT_STEPS} />
+      </div>
+    );
+  }
+
   if (loggedIn) {
     if (switchingTenant) {
       return (
@@ -170,7 +202,7 @@ export default function App() {
     }
     return (
       <div style={{ opacity: dashVisible ? 1 : 0, transition: 'opacity 0.4s ease', width: '100%', height: '100%' }}>
-        <DashboardView activeBrand={activeBrand} onBrandChange={handleBrandChange} />
+        <DashboardView activeBrand={activeBrand} onBrandChange={handleBrandChange} onLogout={handleLogout} />
       </div>
     );
   }
@@ -245,6 +277,7 @@ export default function App() {
       boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.16)',
       opacity: loginVisible ? 1 : 0,
       transition: 'opacity 0.35s ease',
+      animation: 'profileFadeIn 0.35s ease',
     }}>
 
       {/* Title */}

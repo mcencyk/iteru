@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { BRANDS } from './BrandGrid';
 
 const base = import.meta.env.BASE_URL;
@@ -220,10 +220,112 @@ function CloseButton({ onClose }) {
   );
 }
 
+// ─── Logout confirmation modal ────────────────────────────────────────────────
+function LogoutModal({ onCancel, onConfirm }) {
+  const [closing, setClosing] = useState(false);
+  const [willConfirm, setWillConfirm] = useState(false);
+  const [closeHovered, setCloseHovered] = useState(false);
+
+  function handleClose() { setClosing(true); }
+  function handleConfirm() { setWillConfirm(true); setClosing(true); }
+
+  function handleAnimationEnd() {
+    if (!closing) return;
+    if (willConfirm) onConfirm();
+    else onCancel();
+  }
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={handleClose}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 300,
+          background: 'rgba(0,20,35,0.55)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          animation: closing ? 'backdropFadeOut 0.22s ease forwards' : 'backdropFadeIn 0.22s ease',
+        }}
+      />
+      {/* Card */}
+      <div
+        onAnimationEnd={handleAnimationEnd}
+        style={{
+          position: 'fixed', top: '50%', left: '50%',
+          zIndex: 301, width: 360,
+          background: 'rgba(1,45,66,0.96)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid #153f53',
+          borderRadius: 20,
+          boxShadow: '0px 8px 32px rgba(0,0,0,0.48)',
+          padding: '28px 28px 24px',
+          display: 'flex', flexDirection: 'column', gap: 20,
+          animation: closing ? 'modalFadeOut 0.22s ease forwards' : 'modalFadeIn 0.22s ease forwards',
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 20, fontWeight: 600, color: '#ffffff', fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.4 }}>
+            Log out
+          </span>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={handleClose}
+              onMouseEnter={() => setCloseHovered(true)}
+              onMouseLeave={() => setCloseHovered(false)}
+              style={{
+                width: 24, height: 24, background: 'none', border: 'none', padding: 0,
+                cursor: 'pointer',
+                color: closeHovered ? 'rgba(204,223,233,0.9)' : 'rgba(128,176,200,0.5)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'color 0.15s',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            {closeHovered && (
+              <div style={{
+                position: 'absolute', bottom: 'calc(100% + 6px)', left: '50%',
+                transform: 'translateX(-50%)',
+                padding: '3px 8px', borderRadius: 4,
+                background: '#012d42', border: '1px solid #153f53',
+                fontSize: 10, fontWeight: 600, color: '#80b0c8',
+                fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
+                pointerEvents: 'none', zIndex: 310,
+              }}>
+                Close
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Body */}
+        <p style={{
+          fontSize: 12, fontWeight: 500, color: '#ccdfe9',
+          fontFamily: "'Inter', sans-serif", lineHeight: '20px', margin: 0,
+        }}>
+          Are you sure you want to log out? Your current session will be terminated and you will be returned to the login screen.
+        </p>
+
+        {/* Buttons */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <ProfileButton onClick={handleClose}>Cancel</ProfileButton>
+          <ProfileButton primary onClick={handleConfirm}>Logout</ProfileButton>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Profile overlay ──────────────────────────────────────────────────────────
-function ProfileOverlay({ onClose, activeBrand: activeBrandProp, onBrandChange }) {
+function ProfileOverlay({ onClose, activeBrand: activeBrandProp, onBrandChange, onLogout }) {
   const [localBrandId, setLocalBrandId] = useState(activeBrandProp?.id ?? 'audi');
   const [closing, setClosing] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const brandRows = [BRANDS.slice(0, 2), BRANDS.slice(2, 4), BRANDS.slice(4, 6)];
 
   function handleClose() {
@@ -366,9 +468,16 @@ function ProfileOverlay({ onClose, activeBrand: activeBrandProp, onBrandChange }
         {/* Footer buttons */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
           <ProfileButton disabled={localBrandId === activeBrandProp?.id} onClick={handleSwitchTenant}>Switch Tenant</ProfileButton>
-          <ProfileButton primary onClick={handleClose}>Logout</ProfileButton>
+          <ProfileButton primary onClick={() => setLogoutModalOpen(true)}>Logout</ProfileButton>
         </div>
       </div>
+
+      {logoutModalOpen && (
+        <LogoutModal
+          onCancel={() => setLogoutModalOpen(false)}
+          onConfirm={onLogout}
+        />
+      )}
     </>
   );
 }
@@ -404,6 +513,305 @@ function ProfileButton({ children, primary, disabled, onClick }) {
     >
       {children}
     </button>
+  );
+}
+
+// ─── Plus icon (matches DashboardView BottomTab) ──────────────────────────────
+const DataPlusIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+function DataImportRow({ label, ts }) {
+  const [hovered, setHovered] = useState(false);
+  const [queued, setQueued] = useState(false);
+  const [animKey, setAnimKey] = useState(0);
+
+  function handleClick() {
+    setQueued(q => !q);
+    setAnimKey(k => k + 1);
+  }
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      height: 36, borderRadius: 6,
+      background: 'rgba(0,70,102,0.24)',
+      padding: '4px 4px 4px 16px',
+    }}>
+      <span style={{
+        fontSize: 12, fontWeight: 600, color: '#ffffff',
+        fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.06,
+        flexShrink: 0,
+      }}>
+        {label}
+      </span>
+      <span style={{
+        flex: 1, fontSize: 10, fontWeight: 500, color: '#80b0c8',
+        fontFamily: "'Inter', sans-serif",
+        letterSpacing: 0.2, textTransform: 'uppercase',
+        textAlign: 'right', whiteSpace: 'nowrap',
+      }}>
+        {ts}
+      </span>
+      <div style={{ position: 'relative', flexShrink: 0 }}>
+        <div
+          key={animKey}
+          onClick={handleClick}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{
+            width: 28, height: 28, borderRadius: 5,
+            background: queued
+              ? 'rgba(40,160,80,0.18)'
+              : hovered ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.09)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: queued ? 'rgba(56,176,96,0.9)' : hovered ? '#ffffff' : 'rgba(128,176,200,0.75)',
+            cursor: 'pointer', transition: 'background 0.2s, color 0.2s',
+            animation: `queuedPop 0.22s ease`,
+          }}
+        >
+          {queued ? <CheckIcon /> : <DataPlusIcon />}
+        </div>
+        {hovered && (
+          <div style={{
+            position: 'absolute', left: 'calc(100% + 8px)', top: '50%',
+            transform: 'translateY(-50%)',
+            padding: '4px 10px', borderRadius: 6,
+            background: '#012d42', border: '1px solid #153f53',
+            fontSize: 11, fontWeight: 600, color: '#80b0c8',
+            fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
+            pointerEvents: 'none', zIndex: 200,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.28)',
+            animation: 'tooltipFadeInRight 0.12s ease forwards',
+          }}>
+            Add to queue
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Chevron icon ─────────────────────────────────────────────────────────────
+const ChevronDownIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+// ─── Data Import overlay ──────────────────────────────────────────────────────
+const DATA_ROWS = [
+  { label: 'System Codes',  ts: '26.05.25 16:42' },
+  { label: 'Sources',       ts: '25.05.25 09:15' },
+  { label: 'Data Models',   ts: '23.05.25 14:30' },
+  { label: 'Parameters',    ts: '20.05.25 11:08' },
+  { label: 'Test Logs',     ts: '18.05.25 22:00' },
+];
+
+const FREQ_OPTIONS = ['Everyday', 'Every week', 'Every month'];
+
+function FrequencySelect({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <div
+        onClick={() => setOpen(o => !o)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          cursor: 'pointer', userSelect: 'none',
+          padding: '4px 8px 4px 12px',
+          borderRadius: '6px 8px 8px 6px',
+          background: open ? 'rgba(0,70,102,0.38)' : hovered ? 'rgba(0,70,102,0.22)' : 'transparent',
+          transition: 'background 0.15s',
+        }}
+      >
+        <span style={{
+          fontSize: 12, fontWeight: 500, color: '#ffffff',
+          fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
+          minWidth: 82,
+        }}>
+          {value}
+        </span>
+        <span style={{
+          color: 'rgba(128,176,200,0.6)',
+          transform: open ? 'rotate(180deg)' : 'none',
+          transition: 'transform 0.2s',
+          display: 'flex',
+        }}>
+          <ChevronDownIcon />
+        </span>
+      </div>
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 4px)', left: 0,
+          background: '#012d42', border: '1px solid #153f53',
+          borderRadius: 8, boxShadow: '0px 8px 12px 0px rgba(0,0,0,0.28)',
+          overflow: 'hidden', zIndex: 200, minWidth: '100%',
+        }}>
+          {FREQ_OPTIONS.map((opt, i) => {
+            const isSelected = opt === value;
+            return (
+              <div
+                key={opt}
+                onClick={() => { onChange(opt); setOpen(false); }}
+                style={{
+                  display: 'flex', alignItems: 'center',
+                  padding: '10px 12px', cursor: 'pointer',
+                  borderBottom: i < FREQ_OPTIONS.length - 1 ? '1px solid #153f53' : 'none',
+                  background: 'transparent',
+                  transition: 'background 0.12s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,70,102,0.3)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{
+                  fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap',
+                  color: isSelected ? '#ffffff' : '#80b0c8',
+                  fontFamily: "'Inter', sans-serif",
+                }}>
+                  {opt}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DataImportOverlay({ onClose }) {
+  const [closing, setClosing] = useState(false);
+  const [freq, setFreq] = useState('Everyday');
+  const [time, setTime] = useState('22:00');
+  const [timeHov, setTimeHov] = useState(false);
+
+  function handleClose() { setClosing(true); }
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div onClick={handleClose} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
+
+      {/* Panel */}
+      <div
+        onAnimationEnd={() => { if (closing) onClose(); }}
+        style={{
+          position: 'fixed',
+          left: 120,
+          bottom: 24,
+          width: 364,
+          background: 'rgba(1,38,56,0.62)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(21,63,83,0.8)',
+          borderRadius: 24,
+          boxShadow: '0px 0px 24px 0px rgba(0,0,0,0.32)',
+          animation: closing
+            ? 'profileFadeOut 0.18s ease forwards'
+            : 'profileFadeIn 0.22s ease',
+          padding: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 24,
+          zIndex: 100,
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <span style={{
+            fontSize: 20, fontWeight: 600, color: '#ffffff',
+            fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.4,
+          }}>
+            Scheduled Updates
+          </span>
+          <CloseButton onClose={handleClose} />
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.08)', flexShrink: 0, marginTop: -12 }} />
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Auto-import row */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+            background: 'rgba(0,70,102,0.12)', border: '1px solid #153f53',
+            borderRadius: 16, padding: '8px 8px 8px 16px',
+          }}>
+            <span style={{
+              fontSize: 12, fontWeight: 600, color: '#ffffff',
+              fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.06,
+              whiteSpace: 'nowrap',
+            }}>
+              Auto-import
+            </span>
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              background: 'rgba(0,70,102,0.12)', border: '1px solid #153f53',
+              borderRadius: 10,
+            }}>
+              <FrequencySelect value={freq} onChange={setFreq} />
+              <div style={{ width: 1, height: 16, background: 'rgba(128,176,200,0.2)', flexShrink: 0 }} />
+              <div
+                onMouseEnter={() => setTimeHov(true)}
+                onMouseLeave={() => setTimeHov(false)}
+                style={{
+                  padding: '4px 8px', display: 'flex', alignItems: 'center',
+                  borderRadius: '8px 6px 6px 8px',
+                  background: timeHov ? 'rgba(0,70,102,0.22)' : 'transparent',
+                  transition: 'background 0.15s',
+                }}
+              >
+                <input
+                  type="time"
+                  value={time}
+                  onChange={e => setTime(e.target.value)}
+                  style={{
+                    background: 'transparent', border: 'none', outline: 'none',
+                    fontSize: 12, fontWeight: 500, color: '#ffffff',
+                    fontFamily: "'Inter', sans-serif",
+                    width: 54, cursor: 'pointer',
+                    colorScheme: 'dark',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Data rows */}
+          <div style={{
+            background: '#012d42', border: '1px solid #153f53',
+            borderRadius: 16, padding: 12,
+            display: 'flex', flexDirection: 'column', gap: 8,
+            boxShadow: '0px 0px 2px 0px rgba(0,0,0,0.24)',
+          }}>
+            {DATA_ROWS.map(row => (
+              <DataImportRow key={row.label} label={row.label} ts={row.ts} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -448,8 +856,9 @@ function AvatarButton({ profileOpen, onClick }) {
   );
 }
 
-export default function Sidebar({ activeNav, onNavChange, attentionCount, activeBrand, onBrandChange }) {
+export default function Sidebar({ activeNav, onNavChange, attentionCount, activeBrand, onBrandChange, onLogout }) {
   const [profileOpen, setProfileOpen] = useState(false);
+  const [dataImportOpen, setDataImportOpen] = useState(false);
 
   return (
     <>
@@ -504,7 +913,7 @@ export default function Sidebar({ activeNav, onNavChange, attentionCount, active
         <Divider />
 
         <NavIcon icon={<BellIcon />} active={activeNav === 'bell'} badge={1} label="Notifications" onClick={() => onNavChange('bell')} />
-        <NavIcon icon={<CalendarIcon />} active={activeNav === 'calendar'} label="Scheduled Updates" onClick={() => onNavChange('calendar')} />
+        <NavIcon icon={<CalendarIcon />} active={dataImportOpen} label="Scheduled Updates" onClick={() => setDataImportOpen(o => !o)} />
 
         {/* Spacer */}
         <div style={{ flex: 1 }} />
@@ -522,7 +931,8 @@ export default function Sidebar({ activeNav, onNavChange, attentionCount, active
         </div>
       </div>
 
-      {profileOpen && <ProfileOverlay onClose={() => setProfileOpen(false)} activeBrand={activeBrand} onBrandChange={onBrandChange} />}
+      {profileOpen && <ProfileOverlay onClose={() => setProfileOpen(false)} activeBrand={activeBrand} onBrandChange={onBrandChange} onLogout={onLogout} />}
+      {dataImportOpen && <DataImportOverlay onClose={() => setDataImportOpen(false)} />}
     </>
   );
 }
