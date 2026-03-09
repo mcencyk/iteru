@@ -990,6 +990,46 @@ const LOAD_STEPS_REFRESH = [
   'Preparing campaign view',
 ];
 
+function BackButton({ onClick }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div style={{ position: 'relative', flexShrink: 0 }}>
+      <button
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          width: 32, height: 32, borderRadius: 8,
+          border: hovered ? '1px solid #28779c' : '1px solid #153f53',
+          background: 'rgba(1,45,66,0.55)',
+          color: hovered ? '#ccdfe9' : 'rgba(128,176,200,0.8)',
+          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'border-color 0.15s, color 0.15s',
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
+      {hovered && (
+        <div style={{
+          position: 'absolute', left: 'calc(100% + 8px)', top: '50%',
+          transform: 'translateY(-50%)',
+          padding: '4px 10px', borderRadius: 6,
+          background: '#012d42', border: '1px solid #153f53',
+          fontSize: 11, fontWeight: 600, color: '#80b0c8',
+          fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
+          pointerEvents: 'none', zIndex: 200,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.28)',
+          animation: 'tooltipFadeInRight 0.12s ease forwards',
+        }}>
+          Back to Overview
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function CampaignDetailView({ campaign, onBack }) {
   const [activeNav, setActiveNav] = useState('aftersales');
@@ -1128,22 +1168,7 @@ export default function CampaignDetailView({ campaign, onBack }) {
         {/* ── Header ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
           {/* Back button */}
-          <button
-            onClick={handleBack}
-            style={{
-              width: 32, height: 32, borderRadius: 8, border: '1px solid #153f53',
-              background: 'rgba(1,45,66,0.55)', color: 'rgba(128,176,200,0.8)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0, transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ccdfe9'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#153f53'; e.currentTarget.style.color = 'rgba(128,176,200,0.8)'; }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/>
-              <polyline points="12 19 5 12 12 5"/>
-            </svg>
-          </button>
+          <BackButton onClick={handleBack} />
 
           {/* Campaign name */}
           <span style={{ fontSize: 22, fontWeight: 700, color: '#ffffff', fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.3, whiteSpace: 'nowrap' }}>
@@ -1182,7 +1207,7 @@ export default function CampaignDetailView({ campaign, onBack }) {
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           <FilterDropdown label="All Countries" />
           <FilterDropdown label="All Product IDs" />
-          <FilterDropdown label="All Waves" />
+          <FilterDropdown label="All Intervals" />
         </div>
 
         {/* ── Stats ── */}
@@ -1274,7 +1299,7 @@ export default function CampaignDetailView({ campaign, onBack }) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3)',
         }}>
           <BottomTab label="OVERVIEW" active={activeTab === 'OVERVIEW'} onClick={() => setActiveTab('OVERVIEW')} />
-          <BottomTab label="WAVES" active={activeTab === 'WAVES'} onClick={() => setActiveTab('WAVES')} />
+          <BottomTab label="INTERVALS" active={activeTab === 'WAVES'} onClick={() => setActiveTab('WAVES')} />
 
           {/* Divider */}
           <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.1)', margin: '0 2px' }} />

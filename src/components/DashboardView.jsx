@@ -68,7 +68,7 @@ const TABS_TOP = [
 
 const TABS_BOTTOM = [
   { id: 'CAMPAIGNS',  label: 'CAMPAIGNS',  tooltip: 'New Campaign' },
-  { id: 'CRITERIONS', label: 'CRITERIONS', tooltip: 'New Recall' },
+  { id: 'CRITERIONS', label: 'VARIABLES', tooltip: 'New Variable' },
   { id: 'VEHICLES',   label: 'VEHICLES',   tooltip: 'New Vehicle' },
 ];
 
@@ -76,7 +76,7 @@ const COLUMNS = [
   { key: 'name',     label: 'CAMPAIGN NAME',       flex: 3   },
   { key: 'vehicles', label: 'VEHICLES',             flex: 1   },
   { key: 'code',     label: 'SYSTEM CODE',          flex: 1.2 },
-  { key: 'crit',     label: 'CRITERION',            flex: 1   },
+  { key: 'crit',     label: 'VARIABLE',             flex: 1   },
   { key: 'spec',     label: 'SPECIFICATION MODEL',  flex: 3   },
   { key: 'measure',  label: 'INTERNAL ID',          flex: 2.5 },
   { key: 'type',     label: 'UPDATE TYPE',          flex: 1.2 },
