@@ -459,6 +459,43 @@ function IconBtn({ children, tooltip, danger }) {
   );
 }
 
+// ─── Per-campaign stats (deterministic from campaign id) ─────────────────────
+function getCampaignStats(campaign) {
+  const s = campaign.id;
+  const r = (min, max, salt = 0) => min + ((s * 37 + salt * 13) % (max - min + 1));
+
+  const days         = r(8,  62,  1);
+  const models       = r(2,  9,   2);
+  const countries    = r(2,  14,  3);
+  const updateSpeed  = r(280, 920, 4);
+  const dlSpeed      = r(350, 1400, 5);
+  const dailyCars    = r(40,  680, 6);
+  const launchRate   = r(78,  100, 7);
+  const successRate  = r(72,  98,  8);
+  const failureRate  = 100 - successRate;
+
+  const updateTrend  = updateSpeed > 600 ? 'up' : 'down';
+  const dlTrend      = dlSpeed     > 800 ? 'up' : 'down';
+  const carsTrend    = dailyCars   > 300 ? 'up' : 'down';
+  const successTrend = successRate > 88  ? 'up' : 'down';
+  const failTrend    = failureRate > 12  ? 'up' : 'down';
+
+  const CREATORS = ['MIKE DEAN', 'ANNA KOWALSKI', 'JOHN SMITH', 'LAURA MÜLLER', 'PETER NOVAK', 'SARA JENSEN'];
+  const SPECS    = ['ABS SPRING UPDATE 4', 'ECU PATCH V2.1', 'BRAKE CAL. REV3', 'GATEWAY FW 1.8', 'DRIVE SYS. K7', 'POWERTRAIN B2'];
+  const BASE_IDS = ['CD01_01_TEST INPUT', 'BD02_FLEET_MAIN', 'BD04_ECU_BASE', 'CD07_REGION_A', 'BD11_FULL_DIAG', 'CD03_PARTIAL_R'];
+
+  const creator  = CREATORS[s % CREATORS.length];
+  const spec     = SPECS[s % SPECS.length];
+  const baseData = BASE_IDS[s % BASE_IDS.length];
+
+  const startDates = ['12.01.2024', '05.03.2024', '21.04.2024', '07.08.2024', '12.07.2024', '19.09.2024'];
+  const startDate  = startDates[s % startDates.length];
+
+  return { days, models, countries, updateSpeed, dlSpeed, dailyCars,
+           updateTrend, dlTrend, carsTrend, launchRate, successRate, failureRate,
+           successTrend, failTrend, creator, spec, baseData, startDate };
+}
+
 const LOAD_STEPS_BACK = [
   'Syncing campaign updates',
   'Refreshing campaign list',
@@ -526,6 +563,7 @@ export default function CampaignDetailView({ campaign, onBack }) {
   }
 
   const status = campaign.statuses[0];
+  const stats = getCampaignStats(campaign);
 
   return (
     <div style={{
@@ -569,9 +607,9 @@ export default function CampaignDetailView({ campaign, onBack }) {
 
           {/* Meta info */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0, overflow: 'hidden' }}>
-            <MetaItem label="INPUT CAMPAIGN" value="CD01_01_TEST INPUT" />
-            <MetaItem label="SPECIFICATION MODEL" value="ABS SPRING UPDATE 4" />
-            <MetaItem label="CREATOR" value="MIKE DEAN" />
+            <MetaItem label="BASE DATA" value={stats.baseData} />
+            <MetaItem label="SPECIFICATION MODEL" value={stats.spec} />
+            <MetaItem label="CREATOR" value={stats.creator} />
           </div>
 
           {/* Spacer */}
@@ -592,36 +630,36 @@ export default function CampaignDetailView({ campaign, onBack }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
           {/* Row 1: 6 small cards */}
           <div style={{ display: 'flex', gap: 10 }}>
-            <StatCard value="23" unit="days" label="Since start (31.04.2024)" />
-            <StatCard value="3" label="Models" />
-            <StatCard value="5" label="Countries" />
-            <StatCard value="532" unit="sec" trend="down" label="Average update speed" />
-            <StatCard value="839" unit="sec" trend="up" label="Average download speed" />
-            <StatCard value="314" unit="cars" trend="down" label="Updated vehicles each day" />
+            <StatCard value={stats.days} unit="days" label={`Since start (${stats.startDate})`} />
+            <StatCard value={stats.models} label="Models" />
+            <StatCard value={stats.countries} label="Countries" />
+            <StatCard value={stats.updateSpeed} unit="sec" trend={stats.updateTrend} label="Average update speed" />
+            <StatCard value={stats.dlSpeed} unit="sec" trend={stats.dlTrend} label="Average download speed" />
+            <StatCard value={stats.dailyCars} unit="cars" trend={stats.carsTrend} label="Updated vehicles each day" />
           </div>
 
           {/* Row 2: 3 progress cards */}
           <div style={{ display: 'flex', gap: 10 }}>
             <ProgressCard
-              value="100%"
-              trend="neutral"
+              value={`${stats.launchRate}%`}
+              trend={stats.launchRate === 100 ? 'neutral' : 'down'}
               label="Launch rate"
               barColor="linear-gradient(90deg, #28779c 0%, #28a0c8 100%)"
-              barWidth="100%"
+              barWidth={`${stats.launchRate}%`}
             />
             <ProgressCard
-              value="92%"
-              trend="down"
+              value={`${stats.successRate}%`}
+              trend={stats.successTrend}
               label="Success rate"
               barColor="linear-gradient(90deg, #28779c 0%, #28a0c8 100%)"
-              barWidth="92%"
+              barWidth={`${stats.successRate}%`}
             />
             <ProgressCard
-              value="8%"
-              trend="up"
+              value={`${stats.failureRate}%`}
+              trend={stats.failTrend}
               label="Failure rate"
               barColor="linear-gradient(90deg, #8b2020 0%, #cc3333 100%)"
-              barWidth="8%"
+              barWidth={`${stats.failureRate}%`}
             />
           </div>
         </div>
