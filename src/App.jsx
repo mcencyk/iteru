@@ -8,7 +8,7 @@ import './App.css';
 const defaultBrand = BRANDS.find(b => b.id === 'audi');
 
 const LOAD_STEPS = [
-  'Connecting to GVU Group servers',
+  'Connecting to ITERU servers',
   'Fetching campaign data',
   'Loading vehicle fleet information',
   'Synchronizing update specifications',
@@ -34,13 +34,13 @@ function LoaderScreen({ step, visible, steps = LOAD_STEPS }) {
       gap: 36, pointerEvents: 'none',
     }}>
       <div style={{ textAlign: 'center', fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
-        <div style={{ fontSize: 24, letterSpacing: 0.5, color: '#ffffff' }}>GVU</div>
+        <div style={{ fontSize: 24, letterSpacing: 0.5, color: '#ffffff' }}>ITERU</div>
         <div style={{ fontSize: 8, letterSpacing: 3.5, color: '#ccdfe9', opacity: 0.4, marginTop: 2 }}>PRO</div>
       </div>
       <div style={{
         width: 32, height: 32, borderRadius: '50%',
         border: '2px solid rgba(128,176,200,0.15)', borderTopColor: '#28a0c8',
-        animation: 'gvuSpin 0.85s linear infinite',
+        animation: 'iteruSpin 0.85s linear infinite',
       }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {steps.map((s, i) => (
@@ -221,7 +221,7 @@ export default function App() {
         padding: '32px 24px', gap: 32, textAlign: 'center',
       }}>
         <div style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
-          <div style={{ fontSize: 28, letterSpacing: 0.5, color: '#ffffff' }}>GVU</div>
+          <div style={{ fontSize: 28, letterSpacing: 0.5, color: '#ffffff' }}>ITERU</div>
           <div style={{ fontSize: 14, letterSpacing: 5, color: '#ccdfe9', opacity: 0.5, marginTop: 2 }}>PRO</div>
         </div>
 
@@ -248,7 +248,7 @@ export default function App() {
             fontFamily: "'Inter', sans-serif", lineHeight: 1.6,
             maxWidth: 280,
           }}>
-            GVU Pro is designed for desktop use. Due to the complexity and density of the interface, mobile devices are not supported.
+            ITERU is designed for desktop use. Due to the complexity and density of the interface, mobile devices are not supported.
           </div>
           <div style={{
             fontSize: 12, fontWeight: 500, color: 'rgba(128,176,200,0.4)',
@@ -283,7 +283,7 @@ export default function App() {
       {/* Title */}
       <div style={{ textAlign: 'center', fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
         <div style={{ fontSize: 42.647, letterSpacing: 0.853, color: '#ffffff', lineHeight: 1.3 }}>
-          GVU
+          ITERU
         </div>
         <div style={{ fontSize: 25.588, letterSpacing: 8.188, color: '#ccdfe9', opacity: 0.5, lineHeight: 1.3, paddingLeft: 8 }}>
           PRO

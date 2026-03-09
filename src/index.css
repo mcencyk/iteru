@@ -15,7 +15,7 @@ body {
   font-weight: 400;
 }
 
-@keyframes gvuSpin {
+@keyframes iteruSpin {
   to { transform: rotate(360deg); }
 }
 

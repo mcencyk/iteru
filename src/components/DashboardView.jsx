@@ -475,7 +475,7 @@ export default function DashboardView({ activeBrand, onBrandChange, onLogout }) 
           <div style={{
             width: 28, height: 28, borderRadius: '50%',
             border: '2px solid rgba(128,176,200,0.15)', borderTopColor: '#28a0c8',
-            animation: 'gvuSpin 0.85s linear infinite',
+            animation: 'iteruSpin 0.85s linear infinite',
           }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {LOAD_STEPS_CAMPAIGN.map((s, i) => (

@@ -873,7 +873,7 @@ export default function Sidebar({ activeNav, onNavChange, attentionCount, active
         boxShadow: '0px 0px 12px 0px rgba(0,30,45,0.32)',
         overflow: 'visible',
       }}>
-        {/* Logo + GVU PRO */}
+        {/* Logo + ITERU PRO */}
         <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           gap: 8, paddingTop: 24, paddingBottom: 12,
@@ -899,7 +899,7 @@ export default function Sidebar({ activeNav, onNavChange, attentionCount, active
             )}
           </div>
           <div style={{ textAlign: 'center', fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
-            <div style={{ fontSize: 13, letterSpacing: 0.3, color: '#ffffff', lineHeight: '16px' }}>GVU</div>
+            <div style={{ fontSize: 13, letterSpacing: 0.3, color: '#ffffff', lineHeight: '16px' }}>ITERU</div>
             <div style={{ fontSize: 8, letterSpacing: 2.5, color: '#ccdfe9', opacity: 0.5, lineHeight: '12px' }}>PRO</div>
           </div>
         </div>

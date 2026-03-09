@@ -1,6 +1,6 @@
-# GVU Pro
+# ITERU
 
-React + Vite implementation of the **GVU Pro** dashboard — a fleet campaign management interface built from Figma design.
+React + Vite implementation of the **ITERU** dashboard — a fleet campaign management interface built from Figma design.
 
 ## Stack
 
