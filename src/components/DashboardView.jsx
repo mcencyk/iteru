@@ -611,7 +611,7 @@ export default function DashboardView() {
               display: 'flex', alignItems: 'center',
               height: 40, flexShrink: 0,
               borderBottom: '1px solid #153f53',
-              background: 'rgb(2, 52, 78)',
+              background: 'rgb(1, 41, 64)',
               position: 'sticky', top: 0, zIndex: 1,
             }}>
               {COLUMNS.map(col => {
