@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar';
+import CampaignDetailView from './CampaignDetailView';
 
 // ─── Status badge config ────────────────────────────────────────────────────
 const STATUS = {
@@ -360,8 +361,18 @@ function FilterPanel({ filters, onChange, activeFilterCount }) {
   );
 }
 
+const LOAD_STEPS_CAMPAIGN = [
+  'Fetching campaign data',
+  'Loading vehicle statistics',
+  'Preparing campaign view',
+];
+
 // ─── Main component ──────────────────────────────────────────────────────────
 export default function DashboardView() {
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [loadingCampaign, setLoadingCampaign] = useState(null);
+  const [loadStep, setLoadStep] = useState(0);
+  const [loaderVisible, setLoaderVisible] = useState(false);
   const [activeNav, setActiveNav] = useState('aftersales');
   const [activeTopTab, setActiveTopTab] = useState('all');
   const [activeBottomTab, setActiveBottomTab] = useState('CAMPAIGNS');  // id
@@ -374,6 +385,68 @@ export default function DashboardView() {
   const [sort, setSort] = useState({ key: 'name', dir: 'asc' });
   const [hoveredCol, setHoveredCol] = useState(null);
   const [hoveredPage, setHoveredPage] = useState(null);
+
+  function handleCampaignOpen(row) {
+    setLoadingCampaign(row);
+    setLoadStep(0);
+    requestAnimationFrame(() => requestAnimationFrame(() => setLoaderVisible(true)));
+    setTimeout(() => setLoadStep(1), 450);
+    setTimeout(() => setLoadStep(2), 900);
+    setTimeout(() => setLoaderVisible(false), 1300);
+    setTimeout(() => {
+      setLoadingCampaign(null);
+      setSelectedCampaign(row);
+    }, 1600);
+  }
+
+  if (selectedCampaign) {
+    return <CampaignDetailView campaign={selectedCampaign} onBack={() => setSelectedCampaign(null)} />;
+  }
+
+  if (loadingCampaign) {
+    return (
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        width: '100vw', height: '100vh',
+        background: 'radial-gradient(ellipse 80% 70% at 50% 30%, #005478 0%, #004060 40%, #002233 100%)',
+        backgroundColor: '#003050',
+      }}>
+        <div style={{
+          opacity: loaderVisible ? 1 : 0, transition: 'opacity 0.3s ease',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28,
+        }}>
+          <div style={{ textAlign: 'center', fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(128,176,200,0.6)', fontFamily: "'Inter', sans-serif", letterSpacing: 0.5, marginBottom: 6 }}>
+              Loading campaign
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#ffffff', fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.3 }}>
+              {loadingCampaign.name}
+            </div>
+          </div>
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            border: '2px solid rgba(128,176,200,0.15)', borderTopColor: '#28a0c8',
+            animation: 'gvuSpin 0.85s linear infinite',
+          }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {LOAD_STEPS_CAMPAIGN.map((s, i) => (
+              <div key={i} style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                fontSize: 11, fontFamily: "'Inter', sans-serif", fontWeight: 500, letterSpacing: 0.2,
+                color: i < loadStep ? 'rgba(56,176,96,0.85)' : i === loadStep ? 'rgba(204,223,233,0.9)' : 'rgba(128,176,200,0.2)',
+                transition: 'color 0.3s ease',
+              }}>
+                <span style={{ width: 14, display: 'flex', justifyContent: 'center', fontSize: i < loadStep ? 11 : 13 }}>
+                  {i < loadStep ? '✓' : i === loadStep ? '›' : '·'}
+                </span>
+                {s}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const searchLower = searchValue.trim().toLowerCase();
 
@@ -668,6 +741,7 @@ export default function DashboardView() {
                   cursor: 'pointer',
                   transition: 'background 0.1s',
                 }}
+                onClick={() => handleCampaignOpen(row)}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,70,102,0.2)'}
                 onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'rgba(0,50,74,0.15)'}
               >
