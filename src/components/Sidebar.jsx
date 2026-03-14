@@ -1080,6 +1080,251 @@ function DataImportOverlay({ onClose, onScheduled }) {
   );
 }
 
+// ─── Reports overlay ─────────────────────────────────────────────────────────
+const REPORT_RANGES = [
+  { id: '7d',    label: 'Last 7 days',  days: 7  },
+  { id: '30d',   label: 'Last 30 days', days: 30 },
+  { id: '90d',   label: 'Last 90 days', days: 90 },
+  { id: 'month', label: 'This Month',   days: null },
+  { id: 'custom', label: 'Custom',      days: null },
+];
+const REPORT_SCOPES = [
+  { id: 'field',     label: 'Field Campaigns'   },
+  { id: 'lab',       label: 'Lab Campaigns'      },
+  { id: 'scheduled', label: 'Scheduled Updates'  },
+  { id: 'vehicles',  label: 'Vehicle Data'       },
+  { id: 'system',    label: 'System Events'      },
+];
+const REPORT_FORMATS = ['PDF', 'CSV', 'Excel'];
+
+function toDateStr(d) { return d.toISOString().slice(0, 10); }
+
+function ReportsOverlay({ onClose }) {
+  const [closing, setClosing] = useState(false);
+  const today = toDateStr(new Date());
+  const [activeRange, setActiveRange] = useState('30d');
+  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); d.setDate(d.getDate() - 30); return toDateStr(d); });
+  const [dateTo, setDateTo] = useState(today);
+  const [scopes, setScopes] = useState(new Set(['field', 'lab']));
+  const [format, setFormat] = useState('PDF');
+  const [generating, setGenerating] = useState(false);
+  const [generated, setGenerated] = useState(false);
+  const [genHov, setGenHov] = useState(false);
+
+  function handleRangeClick(r) {
+    setActiveRange(r.id);
+    if (r.id === 'month') {
+      const d = new Date(); d.setDate(1);
+      setDateFrom(toDateStr(d)); setDateTo(today);
+    } else if (r.days) {
+      const d = new Date(); d.setDate(d.getDate() - r.days);
+      setDateFrom(toDateStr(d)); setDateTo(today);
+    }
+  }
+
+  function toggleScope(id) {
+    setScopes(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  }
+
+  const locked = generating;
+  const canGenerate = scopes.size > 0 && dateFrom && dateTo && dateFrom <= dateTo && !generating && !generated;
+
+  function handleGenerate() {
+    if (!canGenerate) return;
+    setGenerating(true);
+    setTimeout(() => { setGenerating(false); setGenerated(true); }, 1800);
+  }
+
+  function handleClose() { setClosing(true); }
+
+  const inputStyle = {
+    background: 'rgba(0,70,102,0.24)', border: '1px solid #153f53', borderRadius: 8,
+    color: '#ccdfe9', fontSize: 12, fontWeight: 500, fontFamily: "'Inter', sans-serif",
+    padding: '7px 10px', outline: 'none', width: '100%', boxSizing: 'border-box', colorScheme: 'dark',
+  };
+
+  return (
+    <>
+      <div onClick={handleClose} style={{ position: 'fixed', inset: 0, zIndex: 99 }} />
+      <div
+        onAnimationEnd={() => { if (closing) onClose(); }}
+        style={{
+          position: 'fixed', left: 120, bottom: 24, width: 380,
+          background: 'rgba(1,38,56,0.62)',
+          backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(21,63,83,0.8)',
+          borderRadius: 24, boxShadow: '0px 0px 24px 0px rgba(0,0,0,0.32)',
+          animation: closing ? 'profileFadeOut 0.18s ease forwards' : 'profileFadeIn 0.22s ease',
+          padding: 24, display: 'flex', flexDirection: 'column', gap: 20,
+          zIndex: 100, boxSizing: 'border-box',
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#ffffff', fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.3 }}>
+            Reports
+          </span>
+          <CloseButton onClose={handleClose} />
+        </div>
+
+        <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.08)', flexShrink: 0, marginTop: -8 }} />
+
+        {/* Date Range */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, opacity: locked ? 0.4 : 1, pointerEvents: locked ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter', sans-serif", letterSpacing: 1.8, textTransform: 'uppercase' }}>
+            Date Range
+          </span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {REPORT_RANGES.map(r => {
+              const active = activeRange === r.id;
+              return (
+                <div
+                  key={r.id}
+                  onClick={() => handleRangeClick(r)}
+                  style={{
+                    padding: '5px 12px', borderRadius: 20, cursor: 'pointer',
+                    background: active ? 'rgba(40,119,156,0.28)' : 'rgba(0,70,102,0.24)',
+                    border: active ? '1px solid rgba(40,119,156,0.55)' : '1px solid transparent',
+                    fontSize: 11, fontWeight: 600,
+                    color: active ? '#5bc8f0' : 'rgba(128,176,200,0.7)',
+                    fontFamily: "'Inter', sans-serif", transition: 'all 0.15s',
+                  }}
+                >
+                  {r.label}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+              <span style={{ fontSize: 9, fontWeight: 600, color: 'rgba(128,176,200,0.45)', fontFamily: "'Inter', sans-serif", letterSpacing: 1 }}>FROM</span>
+              <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setActiveRange('custom'); }} style={inputStyle} />
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+              <span style={{ fontSize: 9, fontWeight: 600, color: 'rgba(128,176,200,0.45)', fontFamily: "'Inter', sans-serif", letterSpacing: 1 }}>TO</span>
+              <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setActiveRange('custom'); }} style={inputStyle} />
+            </div>
+          </div>
+        </div>
+
+        {/* Data Scope */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, opacity: locked ? 0.4 : 1, pointerEvents: locked ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter', sans-serif", letterSpacing: 1.8, textTransform: 'uppercase' }}>
+            Data Scope
+          </span>
+          <div style={{ background: '#012d42', border: '1px solid #153f53', borderRadius: 12, padding: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {REPORT_SCOPES.map(s => {
+              const active = scopes.has(s.id);
+              return (
+                <div
+                  key={s.id}
+                  onClick={() => toggleScope(s.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    height: 34, padding: '0 10px 0 14px', borderRadius: 7, cursor: 'pointer',
+                    background: active ? 'rgba(40,119,156,0.14)' : 'rgba(0,70,102,0.18)',
+                    border: active ? '1px solid rgba(40,119,156,0.28)' : '1px solid transparent',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <span style={{ fontSize: 12, fontWeight: 500, color: active ? '#ccdfe9' : 'rgba(128,176,200,0.65)', fontFamily: "'Inter', sans-serif", transition: 'color 0.15s' }}>
+                    {s.label}
+                  </span>
+                  <div style={{
+                    width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+                    background: active ? 'rgba(40,119,156,0.45)' : 'rgba(0,70,102,0.4)',
+                    border: active ? '1px solid rgba(40,160,200,0.55)' : '1px solid rgba(128,176,200,0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.15s',
+                  }}>
+                    {active && (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#5bc8f0" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Format */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, opacity: locked ? 0.4 : 1, pointerEvents: locked ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter', sans-serif", letterSpacing: 1.8, textTransform: 'uppercase' }}>
+            Format
+          </span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {REPORT_FORMATS.map(f => {
+              const active = format === f;
+              return (
+                <div
+                  key={f}
+                  onClick={() => setFormat(f)}
+                  style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    height: 34, borderRadius: 8, cursor: 'pointer',
+                    background: active ? 'rgba(40,119,156,0.28)' : 'rgba(0,70,102,0.24)',
+                    border: active ? '1px solid rgba(40,119,156,0.55)' : '1px solid transparent',
+                    fontSize: 11, fontWeight: 700, color: active ? '#5bc8f0' : 'rgba(128,176,200,0.6)',
+                    fontFamily: "'Inter', sans-serif", letterSpacing: 0.8,
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {f}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Generate / Download button */}
+        <button
+          onClick={generated ? undefined : handleGenerate}
+          onMouseEnter={() => (canGenerate || generated) && setGenHov(true)}
+          onMouseLeave={() => setGenHov(false)}
+          style={{
+            width: '100%', height: 40, borderRadius: 8, border: 'none',
+            background: generated
+              ? (genHov ? 'rgba(40,160,90,0.38)' : 'rgba(40,140,80,0.28)')
+              : canGenerate
+                ? (genHov ? '#005a80' : '#004666')
+                : 'rgba(21,63,83,0.3)',
+            color: generated ? '#4cd87a' : canGenerate ? '#ccdfe9' : 'rgba(128,176,200,0.3)',
+            fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase',
+            fontFamily: "'Inter', sans-serif",
+            cursor: (canGenerate || generated) ? 'pointer' : 'not-allowed',
+            transition: 'background 0.15s, color 0.15s, box-shadow 0.15s',
+            boxShadow: generated && genHov
+              ? '0px 2px 8px 0px rgba(0,60,20,0.4)'
+              : canGenerate && genHov
+                ? '0px 2px 8px 0px rgba(0,37,55,0.48)'
+                : canGenerate ? '0px 1px 4px 0px rgba(0,37,55,0.32)' : 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            flexShrink: 0,
+          }}
+        >
+          {generating ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(204,223,233,0.8)" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'schedSpin 0.75s linear infinite' }}>
+              <path d="M12 2a10 10 0 0 1 10 10" />
+            </svg>
+          ) : generated ? (
+            <>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4cd87a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Download Report
+            </>
+          ) : (
+            `Generate ${format}`
+          )}
+        </button>
+
+      </div>
+    </>
+  );
+}
+
 function AvatarButton({ profileOpen, onClick }) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -1544,6 +1789,7 @@ function NotificationsOverlay({ notifications, onClose, onMarkAllRead, onMarkRea
 export default function Sidebar({ activeNav, onNavChange, attentionCount, testAttentionCount, activeBrand, onBrandChange, onLogout, onOpenCampaign }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [systemSettingsOpen, setSystemSettingsOpen] = useState(false);
+  const [reportsOpen, setReportsOpen] = useState(false);
   const [dataImportOpen, setDataImportOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -1628,7 +1874,7 @@ export default function Sidebar({ activeNav, onNavChange, attentionCount, testAt
 
         <NavIcon icon={<GridIcon />} active={activeNav === 'aftersales'} badge={attentionCount} label="Field" onClick={() => onNavChange('aftersales')} />
         <NavIcon icon={<AtomIcon />} active={activeNav === 'people'} badge={testAttentionCount} label="Lab" onClick={() => onNavChange('people')} />
-        <NavIcon icon={<ClipboardIcon />} active={activeNav === 'settings'} label="Reports" onClick={() => onNavChange('settings')} />
+        <NavIcon icon={<ClipboardIcon />} active={reportsOpen} label="Reports" onClick={() => setReportsOpen(o => !o)} />
 
         <Divider />
 
@@ -1652,6 +1898,7 @@ export default function Sidebar({ activeNav, onNavChange, attentionCount, testAt
       </div>
 
       {systemSettingsOpen && <SystemSettingsOverlay onClose={() => setSystemSettingsOpen(false)} />}
+      {reportsOpen && <ReportsOverlay onClose={() => setReportsOpen(false)} />}
       {profileOpen && <ProfileOverlay onClose={() => setProfileOpen(false)} activeBrand={activeBrand} onBrandChange={onBrandChange} onLogout={onLogout} />}
       {dataImportOpen && <DataImportOverlay onClose={() => setDataImportOpen(false)} onScheduled={() => { setDataImportOpen(false); setShowToast(true); }} />}
       {showToast && <ScheduleToast onDone={() => setShowToast(false)} />}
