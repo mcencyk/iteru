@@ -82,15 +82,24 @@ const TABS_BOTTOM = [
 ];
 
 const VARIABLES_DATA = [
-  { code: '01', name: 'ECU Firmware Baseline Config',    created: '10.01.2024', modified: '15.03.2024', source: 'ECU_BASE_CFG_v1.xlsx',  author: 'Jonathan Blackwell',    type: 'Manual', campaigns: 4, status: 'Active'     },
-  { code: '02', name: 'Brake Module Calibration Set',    created: '22.01.2024', modified: '22.01.2024', source: 'BRK_CAL_v2.xlsx',       author: 'Natalia Ferreira',      type: 'Import', campaigns: 2, status: 'Active'     },
-  { code: '03', name: 'Gateway Protocol Parameters',     created: '01.02.2024', modified: '01.03.2024', source: 'GW_PARAMS_2024.csv',    author: 'Hiroshi Tanaka',        type: 'Import', campaigns: 3, status: 'Active'     },
-  { code: '04', name: 'Powertrain Calibration Baseline', created: '12.02.2024', modified: '12.02.2024', source: 'PWR_CAL_BASE_2024.csv', author: 'Jonathan Blackwell',    type: 'Manual', campaigns: 1, status: 'Active'     },
-  { code: '05', name: 'ABS Thresholds v2.1',             created: '20.02.2024', modified: '05.04.2024', source: 'ABS_THRESH_v2.1.xlsx',  author: 'Amélie Duchamp',        type: 'Import', campaigns: 5, status: 'Active'     },
-  { code: '06', name: 'Drive Unit OTA Parameters',       created: '05.03.2024', modified: '05.03.2024', source: 'OTA_DU_PARAMS.csv',     author: 'Natalia Ferreira',      type: 'Import', campaigns: 3, status: 'Active'     },
-  { code: '07', name: 'Charging System Config Set',      created: '17.03.2024', modified: '17.03.2024', source: 'CHG_SYS_CFG_v3.xlsx',   author: 'Sebastian Müller',      type: 'Manual', campaigns: 2, status: 'Active'     },
-  { code: '08', name: 'Display Module Variables',        created: '01.04.2024', modified: '20.05.2024', source: 'DSP_VARS_1.5.xlsx',     author: 'Hiroshi Tanaka',        type: 'Import', campaigns: 1, status: 'Deprecated' },
-  { code: '09', name: 'HVAC Control Parameters',         created: '14.04.2024', modified: '14.04.2024', source: 'HVAC_CTRL_v3.csv',      author: 'Amélie Duchamp',        type: 'Import', campaigns: 2, status: 'Active'     },
+  { code: '01', name: 'ECU Firmware Baseline Config',    created: '10.01.2024', modified: '15.03.2024', source: 'ECU_BASE_CFG_v1.xlsx',  author: 'Jonathan Blackwell',    type: 'Manual', campaigns: 4, status: 'Active',
+    files: [{ name: 'ECU_BASE_CFG_v1.xlsx', date: '15.03.2024', type: 'Manual' }, { name: 'ECU_BASE_CFG_v0.9.xlsx', date: '20.02.2024', type: 'Manual' }, { name: 'ECU_BASE_CFG_v0.8.xlsx', date: '10.01.2024', type: 'Manual' }] },
+  { code: '02', name: 'Brake Module Calibration Set',    created: '22.01.2024', modified: '22.01.2024', source: 'BRK_CAL_v2.xlsx',       author: 'Natalia Ferreira',      type: 'Import', campaigns: 2, status: 'Active',
+    files: [{ name: 'BRK_CAL_v2.xlsx', date: '22.01.2024', type: 'Import' }, { name: 'BRK_CAL_v1.xlsx', date: '05.11.2023', type: 'Import' }] },
+  { code: '03', name: 'Gateway Protocol Parameters',     created: '01.02.2024', modified: '01.03.2024', source: 'GW_PARAMS_2024.csv',    author: 'Hiroshi Tanaka',        type: 'Import', campaigns: 3, status: 'Active',
+    files: [{ name: 'GW_PARAMS_2024.csv', date: '01.03.2024', type: 'Import' }, { name: 'GW_PARAMS_2024_draft.csv', date: '01.02.2024', type: 'Import' }, { name: 'GW_PARAMS_2023.csv', date: '14.10.2023', type: 'Import' }] },
+  { code: '04', name: 'Powertrain Calibration Baseline', created: '12.02.2024', modified: '12.02.2024', source: 'PWR_CAL_BASE_2024.csv', author: 'Jonathan Blackwell',    type: 'Manual', campaigns: 1, status: 'Active',
+    files: [{ name: 'PWR_CAL_BASE_2024.csv', date: '12.02.2024', type: 'Manual' }, { name: 'PWR_CAL_BASE_2023.csv', date: '03.09.2023', type: 'Manual' }] },
+  { code: '05', name: 'ABS Thresholds v2.1',             created: '20.02.2024', modified: '05.04.2024', source: 'ABS_THRESH_v2.1.xlsx',  author: 'Amélie Duchamp',        type: 'Import', campaigns: 5, status: 'Active',
+    files: [{ name: 'ABS_THRESH_v2.1.xlsx', date: '05.04.2024', type: 'Import' }, { name: 'ABS_THRESH_v2.0.xlsx', date: '20.02.2024', type: 'Import' }, { name: 'ABS_THRESH_v1.8.xlsx', date: '11.12.2023', type: 'Import' }, { name: 'ABS_THRESH_v1.5.xlsx', date: '07.08.2023', type: 'Manual' }] },
+  { code: '06', name: 'Drive Unit OTA Parameters',       created: '05.03.2024', modified: '05.03.2024', source: 'OTA_DU_PARAMS.csv',     author: 'Natalia Ferreira',      type: 'Import', campaigns: 3, status: 'Active',
+    files: [{ name: 'OTA_DU_PARAMS.csv', date: '05.03.2024', type: 'Import' }, { name: 'OTA_DU_PARAMS_prev.csv', date: '18.01.2024', type: 'Import' }] },
+  { code: '07', name: 'Charging System Config Set',      created: '17.03.2024', modified: '17.03.2024', source: 'CHG_SYS_CFG_v3.xlsx',   author: 'Sebastian Müller',      type: 'Manual', campaigns: 2, status: 'Active',
+    files: [{ name: 'CHG_SYS_CFG_v3.xlsx', date: '17.03.2024', type: 'Manual' }, { name: 'CHG_SYS_CFG_v2.xlsx', date: '29.01.2024', type: 'Manual' }, { name: 'CHG_SYS_CFG_v1.xlsx', date: '04.11.2023', type: 'Manual' }] },
+  { code: '08', name: 'Display Module Variables',        created: '01.04.2024', modified: '20.05.2024', source: 'DSP_VARS_1.5.xlsx',     author: 'Hiroshi Tanaka',        type: 'Import', campaigns: 1, status: 'Deprecated',
+    files: [{ name: 'DSP_VARS_1.5.xlsx', date: '20.05.2024', type: 'Import' }, { name: 'DSP_VARS_1.3.xlsx', date: '01.04.2024', type: 'Import' }] },
+  { code: '09', name: 'HVAC Control Parameters',         created: '14.04.2024', modified: '14.04.2024', source: 'HVAC_CTRL_v3.csv',      author: 'Amélie Duchamp',        type: 'Import', campaigns: 2, status: 'Active',
+    files: [{ name: 'HVAC_CTRL_v3.csv', date: '14.04.2024', type: 'Import' }, { name: 'HVAC_CTRL_v2.csv', date: '22.02.2024', type: 'Import' }, { name: 'HVAC_CTRL_v1.csv', date: '30.10.2023', type: 'Manual' }] },
 ];
 
 const VAR_COLUMNS = [
@@ -445,6 +454,303 @@ const LOAD_STEPS_BACK = [
   'Loading dashboard',
 ];
 
+// ─── Variable Detail ──────────────────────────────────────────────────────────
+function VarIconBtn({ children, tooltip, danger, onClick }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div style={{ position: 'relative' }}>
+      <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        style={{
+          width: 32, height: 32, borderRadius: 8, border: 'none',
+          background: danger ? (hov ? 'rgba(180,40,40,0.35)' : 'rgba(180,40,40,0.2)') : (hov ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)'),
+          color: danger ? (hov ? '#ff6060' : '#cc4433') : (hov ? '#ccdfe9' : 'rgba(128,176,200,0.7)'),
+          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background 0.15s, color 0.15s',
+        }}>
+        {children}
+      </button>
+      {hov && tooltip && (
+        <div style={{ position: 'absolute', bottom: 'calc(100% + 7px)', left: '50%', transform: 'translateX(-50%)', padding: '3px 8px', borderRadius: 4, whiteSpace: 'nowrap', background: '#012d42', border: '1px solid #153f53', fontSize: 10, fontWeight: 600, color: '#80b0c8', fontFamily: "'Inter', sans-serif", pointerEvents: 'none', zIndex: 200 }}>
+          {tooltip}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VarBackButton({ onClick }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div style={{ position: 'relative', flexShrink: 0 }}>
+      <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+        style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: 'none', color: hov ? '#ccdfe9' : 'rgba(128,176,200,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s' }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
+      {hov && (
+        <div style={{ position: 'absolute', left: 'calc(100% + 8px)', top: '50%', transform: 'translateY(-50%)', padding: '4px 10px', borderRadius: 6, background: '#012d42', border: '1px solid #153f53', fontSize: 11, fontWeight: 600, color: '#80b0c8', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 200, boxShadow: '0 2px 8px rgba(0,0,0,0.28)' }}>
+          Back to Variables
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VarParamsModal({ variable, onClose }) {
+  const [closing, setClosing] = useState(false);
+  const [closeHov, setCloseHov] = useState(false);
+  function handleClose() { setClosing(true); }
+  const row = (label, value) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter',sans-serif", textTransform: 'uppercase' }}>{label}</div>
+      <div style={{ fontSize: 12, fontWeight: 500, color: '#ccdfe9', fontFamily: "'Inter',sans-serif", background: 'rgba(0,50,74,0.4)', border: '1px solid #1e5570', borderRadius: 8, padding: '10px 12px' }}>{value || '—'}</div>
+    </div>
+  );
+  return (
+    <>
+      <div onClick={handleClose} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,46,67,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', animation: closing ? 'backdropFadeOut 0.18s ease forwards' : 'backdropFadeIn 0.22s ease' }} />
+      <div onAnimationEnd={() => { if (closing) onClose(); }}
+        style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 520, background: 'rgba(1,45,66,0.82)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid #153f53', borderRadius: 24, padding: 24, display: 'flex', flexDirection: 'column', gap: 20, boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.24)', zIndex: 201, boxSizing: 'border-box', animation: closing ? 'modalFadeOut 0.18s ease forwards' : 'modalFadeIn 0.22s ease forwards' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 20, fontWeight: 600, color: '#ffffff', fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.4 }}>Variable Parameters</span>
+          <div style={{ position: 'relative' }}>
+            <button onClick={handleClose} onMouseEnter={() => setCloseHov(true)} onMouseLeave={() => setCloseHov(false)}
+              style={{ width: 24, height: 24, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: closeHov ? 'rgba(204,223,233,0.9)' : 'rgba(128,176,200,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            {closeHov && <div style={{ position: 'absolute', bottom: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)', padding: '3px 8px', borderRadius: 4, background: '#012d42', border: '1px solid #153f53', fontSize: 10, fontWeight: 600, color: '#80b0c8', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 210 }}>Close</div>}
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {row('Code', variable.code)}
+          {row('Type', variable.type)}
+          {row('Status', variable.status)}
+          {row('Campaigns', String(variable.campaigns))}
+          {row('Created', variable.created)}
+          {row('Modified', variable.modified)}
+        </div>
+        {row('Name', variable.name)}
+        {row('Source File', variable.source)}
+        {row('Author', variable.author)}
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button onClick={handleClose} style={{ padding: '10px 18px', borderRadius: 8, fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase', color: '#28a0c8', background: 'rgba(40,160,200,0.16)', border: '1px solid rgba(40,160,200,0.4)', cursor: 'pointer', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(40,160,200,0.28)'; }} onMouseLeave={e => { e.currentTarget.style.color = '#28a0c8'; e.currentTarget.style.background = 'rgba(40,160,200,0.16)'; }}>
+            Close
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function VarDeleteModal({ variable, onClose, onConfirm }) {
+  const [closing, setClosing] = useState(false);
+  const [closeHov, setCloseHov] = useState(false);
+  const [cancelHov, setCancelHov] = useState(false);
+  const [deleteHov, setDeleteHov] = useState(false);
+  function handleClose() { setClosing(true); }
+  return (
+    <>
+      <div onClick={handleClose} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,46,67,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', animation: closing ? 'backdropFadeOut 0.18s ease forwards' : 'backdropFadeIn 0.22s ease' }} />
+      <div onAnimationEnd={() => { if (closing) onClose(); }}
+        style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 568, background: 'rgba(1,45,66,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid #153f53', borderRadius: 24, padding: 24, display: 'flex', flexDirection: 'column', gap: 24, boxShadow: '0px 0px 16px 0px rgba(0,0,0,0.16)', zIndex: 201, boxSizing: 'border-box', animation: closing ? 'modalFadeOut 0.18s ease forwards' : 'modalFadeIn 0.22s ease forwards' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 20, fontWeight: 600, color: '#ffffff', fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.4 }}>Delete Variable</span>
+          <div style={{ position: 'relative' }}>
+            <button onClick={handleClose} onMouseEnter={() => setCloseHov(true)} onMouseLeave={() => setCloseHov(false)}
+              style={{ width: 24, height: 24, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: closeHov ? 'rgba(204,223,233,0.9)' : 'rgba(128,176,200,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            {closeHov && <div style={{ position: 'absolute', bottom: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)', padding: '3px 8px', borderRadius: 4, background: '#012d42', border: '1px solid #153f53', fontSize: 10, fontWeight: 600, color: '#80b0c8', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 210 }}>Close</div>}
+          </div>
+        </div>
+        {/* Body */}
+        <div style={{ background: '#012d42', border: '1px solid #153f53', borderRadius: 16, padding: '16px 24px 20px', display: 'flex', flexDirection: 'column', gap: 12, boxShadow: '0px 0px 2px 0px rgba(0,0,0,0.24)' }}>
+          <p style={{ fontSize: 12, fontWeight: 500, color: '#ccdfe9', fontFamily: "'Inter', sans-serif", lineHeight: '20px', margin: 0 }}>
+            Deleting this variable will remove it from the system along with all its source file history. Any campaigns currently referencing this variable may be affected. This action cannot be undone.
+          </p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#ffffff', fontFamily: "'Inter', sans-serif", lineHeight: '22px', margin: 0 }}>
+            Are you sure you want to delete <span style={{ color: '#e06060' }}>{variable.name}</span>?
+          </p>
+        </div>
+        {/* Footer */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <button onClick={handleClose} onMouseEnter={() => setCancelHov(true)} onMouseLeave={() => setCancelHov(false)}
+            style={{ padding: '10px 18px', borderRadius: 8, fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase', color: '#ccdfe9', background: cancelHov ? '#013d58' : '#012d42', border: '1px solid #004666', cursor: 'pointer', transition: 'background 0.15s' }}>
+            Cancel
+          </button>
+          <button onClick={() => { onConfirm?.(); handleClose(); }} onMouseEnter={() => setDeleteHov(true)} onMouseLeave={() => setDeleteHov(false)}
+            style={{ padding: '10px 18px', borderRadius: 8, fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase', color: deleteHov ? '#ff6060' : '#cc4433', background: deleteHov ? 'rgba(180,40,40,0.35)' : 'rgba(180,40,40,0.2)', border: `1px solid ${deleteHov ? 'rgba(200,60,60,0.5)' : 'rgba(180,40,40,0.35)'}`, cursor: 'pointer', transition: 'all 0.15s' }}>
+            Delete
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function FileRow({ file, isCurrent }) {
+  const [hov, setHov] = useState(false);
+  const [dlState, setDlState] = useState('idle'); // idle | loading | done
+
+  function handleDownload() {
+    if (dlState !== 'idle') return;
+    setDlState('loading');
+    setTimeout(() => {
+      setDlState('done');
+      setTimeout(() => setDlState('idle'), 1000);
+    }, 1400);
+  }
+
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{ display: 'flex', alignItems: 'center', height: 40, borderBottom: '1px solid rgba(21,63,83,0.5)', padding: '0 16px', background: isCurrent ? 'rgba(40,160,200,0.06)' : hov ? 'rgba(0,70,102,0.12)' : 'transparent', transition: 'background 0.1s' }}
+    >
+      <div style={{ flex: 3, display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isCurrent ? 'rgba(40,160,200,0.7)' : 'rgba(128,176,200,0.35)'} strokeWidth="1.8" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <span style={{ fontSize: 12, fontWeight: isCurrent ? 600 : 400, color: isCurrent ? '#ccdfe9' : 'rgba(128,176,200,0.55)', fontFamily: "'Inter',sans-serif", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+        {isCurrent && <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.8, color: '#28a0c8', background: 'rgba(40,160,200,0.15)', border: '1px solid rgba(40,160,200,0.3)', borderRadius: 4, padding: '1px 6px', flexShrink: 0 }}>CURRENT</span>}
+      </div>
+      <div style={{ flex: 1, fontSize: 11, color: isCurrent ? 'rgba(204,223,233,0.7)' : 'rgba(128,176,200,0.4)', fontFamily: "'Inter',sans-serif" }}>{file.date}</div>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <VarTypeBadge type={file.type} />
+      </div>
+      {/* Download button — visible on hover */}
+      <div style={{ width: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        {(hov || dlState !== 'idle') && (
+          <button onClick={handleDownload}
+            style={{ width: 24, height: 24, borderRadius: 6, border: 'none', background: dlState === 'done' ? 'rgba(40,140,80,0.2)' : 'rgba(40,160,200,0.15)', color: dlState === 'done' ? '#38b060' : '#28a0c8', cursor: dlState === 'idle' ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s', padding: 0 }}>
+            {dlState === 'loading' && (
+              <div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid rgba(40,160,200,0.25)', borderTopColor: '#28a0c8', animation: 'iteruSpin 0.75s linear infinite' }} />
+            )}
+            {dlState === 'done' && (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            )}
+            {dlState === 'idle' && (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            )}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function VariableDetailView({ variable, onBack, activeBrand, onBrandChange, onLogout }) {
+  const [paramsOpen, setParamsOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  function handleRefresh() {
+    if (refreshing) return;
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1200);
+  }
+
+  const files = variable.files || [{ name: variable.source, date: variable.modified, type: variable.type }];
+
+  const metaLabel = { fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.45)', fontFamily: "'Inter', sans-serif", letterSpacing: 0.8, textTransform: 'uppercase', flexShrink: 0 };
+  const metaValue = { fontSize: 10, fontWeight: 600, color: 'rgba(128,176,200,0.85)', fontFamily: "'Inter', sans-serif" };
+
+  return (
+    <>
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', background: 'radial-gradient(ellipse 80% 70% at 50% 30%, #005478 0%, #004060 40%, #002233 100%)', backgroundColor: '#003050', padding: 24, gap: 24, boxSizing: 'border-box', overflow: 'hidden' }}>
+        <Sidebar activeBrand={activeBrand} onBrandChange={onBrandChange} onLogout={onLogout} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0, position: 'relative' }}>
+
+          {/* Header — campaign pattern */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+            <VarBackButton onClick={onBack} />
+            <span style={{ fontSize: 22, fontWeight: 700, color: '#ffffff', fontFamily: "'Montserrat', sans-serif", letterSpacing: 0.3, whiteSpace: 'nowrap' }}>{variable.name}</span>
+            <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, minWidth: 0 }}>
+                <span style={metaLabel}>CODE:</span>
+                <span style={metaValue}>VAR-{variable.code}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, minWidth: 0 }}>
+                <span style={metaLabel}>AUTHOR:</span>
+                <span style={metaValue}>{variable.author}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, minWidth: 0 }}>
+                <span style={metaLabel}>CREATED:</span>
+                <span style={metaValue}>{variable.created}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, minWidth: 0 }}>
+                <span style={metaLabel}>MODIFIED:</span>
+                <span style={metaValue}>{variable.modified}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, minWidth: 0 }}>
+                <span style={metaLabel}>CAMPAIGNS:</span>
+                <span style={metaValue}>{variable.campaigns}</span>
+              </div>
+            </div>
+            <div style={{ flex: 1 }} />
+            <VarStatusBadge status={variable.status} />
+            <VarTypeBadge type={variable.type} />
+          </div>
+
+          {/* Content */}
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 64 }}>
+
+            {/* Refresh banner */}
+            {refreshing && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 10, background: 'rgba(40,160,200,0.1)', border: '1px solid rgba(40,160,200,0.25)', flexShrink: 0 }}>
+                <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(40,160,200,0.25)', borderTopColor: '#28a0c8', animation: 'iteruSpin 0.75s linear infinite' }} />
+                <span style={{ fontSize: 12, color: 'rgba(128,176,200,0.7)', fontFamily: "'Inter',sans-serif" }}>Refreshing variable data…</span>
+              </div>
+            )}
+
+            {/* Source files */}
+            <div style={{ background: 'rgba(1,45,66,0.6)', border: '1px solid #153f53', borderRadius: 16, overflow: 'hidden', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+              {/* Table header */}
+              <div style={{ display: 'flex', alignItems: 'center', height: 36, borderBottom: '1px solid #153f53', background: 'rgb(1,41,64)', padding: '0 16px', gap: 0 }}>
+                <div style={{ flex: 3, fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter',sans-serif", textTransform: 'uppercase' }}>Source Files</div>
+                <div style={{ flex: 1, fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter',sans-serif", textTransform: 'uppercase' }}>Date Added</div>
+                <div style={{ flex: 1, fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter',sans-serif", textTransform: 'uppercase' }}>Method</div>
+                <div style={{ width: 28, flexShrink: 0 }} />
+              </div>
+              {files.map((f, i) => (
+                <FileRow key={i} file={f} isCurrent={i === 0} />
+              ))}
+            </div>
+          </div>
+
+          {/* Floating action bar */}
+          <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 14, background: 'rgba(1,45,66,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid #153f53', boxShadow: '0px 8px 32px rgba(0,0,0,0.48)', animation: 'floatingBarEnter 0.45s cubic-bezier(0.22,1,0.36,1) both', zIndex: 10 }}>
+            <VarIconBtn tooltip="Refresh data" onClick={handleRefresh}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+            </VarIconBtn>
+            <VarIconBtn tooltip="Variable parameters" onClick={() => setParamsOpen(true)}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </VarIconBtn>
+            <VarIconBtn tooltip="Delete variable" danger onClick={() => setDeleteOpen(true)}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2L5,6"/>
+                <path d="M10,11v6"/><path d="M14,11v6"/><path d="M9,6V4a1,1,0,0,1,1-1h4a1,1,0,0,1,1,1V6"/>
+              </svg>
+            </VarIconBtn>
+          </div>
+
+        </div>
+      </div>
+      {paramsOpen && <VarParamsModal variable={variable} onClose={() => setParamsOpen(false)} />}
+      {deleteOpen && <VarDeleteModal variable={variable} onClose={() => setDeleteOpen(false)} onConfirm={onBack} />}
+    </>
+  );
+}
+
 // ─── New Variable Modal ───────────────────────────────────────────────────────
 function NewVariableModal({ onClose }) {
   const [closing, setClosing] = useState(false);
@@ -655,6 +961,7 @@ function NewVariableModal({ onClose }) {
 
 // ─── Main component ──────────────────────────────────────────────────────────
 export default function DashboardView({ activeBrand, onBrandChange, onLogout }) {
+  const [selectedVariable, setSelectedVariable] = useState(null);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [loadingCampaign, setLoadingCampaign] = useState(null);
   const [loadingBack, setLoadingBack] = useState(false);
@@ -722,6 +1029,10 @@ export default function DashboardView({ activeBrand, onBrandChange, onLogout }) 
 
   if (activeNav === 'people') {
     return <TestUpdatesView activeNav={activeNav} onNavChange={setActiveNav} activeBrand={activeBrand} onBrandChange={onBrandChange} onLogout={onLogout} />;
+  }
+
+  if (selectedVariable) {
+    return <VariableDetailView variable={selectedVariable} onBack={() => setSelectedVariable(null)} activeBrand={activeBrand} onBrandChange={onBrandChange} onLogout={onLogout} />;
   }
 
   if (selectedCampaign) {
@@ -1123,8 +1434,9 @@ export default function DashboardView({ activeBrand, onBrandChange, onLogout }) 
                       display: 'flex', alignItems: 'center',
                       height: 36, flexShrink: 0,
                       borderBottom: '1px solid rgba(21,63,83,0.5)',
-                      background: baseBg, transition: 'background 0.1s',
+                      background: baseBg, transition: 'background 0.1s', cursor: 'pointer',
                     }}
+                    onClick={() => setSelectedVariable(v)}
                     onMouseEnter={e => e.currentTarget.style.background = hoverBg}
                     onMouseLeave={e => e.currentTarget.style.background = baseBg}
                   >
