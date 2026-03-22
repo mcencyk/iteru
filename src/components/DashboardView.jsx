@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './Sidebar';
 import CampaignDetailView from './CampaignDetailView';
 import TestUpdatesView from './TestUpdatesView';
+import NewCampaignWizard from './NewCampaignWizard';
 
 // ─── Status badge config ────────────────────────────────────────────────────
 const STATUS = {
@@ -1154,6 +1155,15 @@ export default function DashboardView({ activeBrand, onBrandChange, onLogout }) 
   const [varSort, setVarSort] = useState({ key: 'code', dir: 'asc' });
   const [varHovCol, setVarHovCol] = useState(null);
   const [addVariableOpen, setAddVariableOpen] = useState(false);
+  const [newCampaignOpen, setNewCampaignOpen] = useState(false);
+  const [campaignCreatedToast, setCampaignCreatedToast] = useState(false);
+  const [campaignToastHiding, setCampaignToastHiding] = useState(false);
+  useEffect(() => {
+    if (!campaignCreatedToast) return;
+    const t1 = setTimeout(() => setCampaignToastHiding(true), 3400);
+    const t2 = setTimeout(() => { setCampaignCreatedToast(false); setCampaignToastHiding(false); }, 3800);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [campaignCreatedToast]);
 
   useEffect(() => {
     if (activeNav === 'field') setActiveBottomTab('CAMPAIGNS');
@@ -1678,7 +1688,7 @@ export default function DashboardView({ activeBrand, onBrandChange, onLogout }) 
               tooltip={tab.tooltip}
               active={activeBottomTab === tab.id}
               onClick={() => handleBottomTabChange(tab.id)}
-              onPlus={tab.id === 'CRITERIONS' ? () => { handleBottomTabChange('CRITERIONS'); setAddVariableOpen(true); } : undefined}
+              onPlus={tab.id === 'CRITERIONS' ? () => { handleBottomTabChange('CRITERIONS'); setAddVariableOpen(true); } : tab.id === 'CAMPAIGNS' ? () => { handleBottomTabChange('CAMPAIGNS'); setNewCampaignOpen(true); } : undefined}
             />
           ))}
         </div>
@@ -1686,6 +1696,18 @@ export default function DashboardView({ activeBrand, onBrandChange, onLogout }) 
       </div>
     </div>
     {addVariableOpen && <NewVariableModal onClose={() => setAddVariableOpen(false)} />}
+    {newCampaignOpen && <NewCampaignWizard onClose={() => setNewCampaignOpen(false)} onSuccess={() => { setNewCampaignOpen(false); setCampaignCreatedToast(true); }} />}
+    {campaignCreatedToast && (
+      <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 999, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 12, background: 'rgba(0,28,18,0.88)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(40,160,70,0.45)', boxShadow: '0 4px 16px rgba(0,0,0,0.32), 0 0 0 1px rgba(40,160,70,0.12)', animation: campaignToastHiding ? 'toastSlideOut 0.32s ease forwards' : 'toastSlideIn 0.28s ease forwards', maxWidth: 300, pointerEvents: 'none' }}>
+        <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, background: 'rgba(40,160,70,0.25)', border: '1px solid rgba(40,200,100,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#40e080" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#40e080', fontFamily: "'Inter', sans-serif", letterSpacing: 0.3 }}>Campaign Created</div>
+          <div style={{ fontSize: 10, fontWeight: 500, color: 'rgba(40,200,100,0.7)', fontFamily: "'Inter', sans-serif", marginTop: 2 }}>Campaign was submitted successfully and is awaiting approval.</div>
+        </div>
+      </div>
+    )}
     </>
   );
 }
