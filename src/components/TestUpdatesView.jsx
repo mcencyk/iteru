@@ -53,7 +53,7 @@ const TABS_TOP = [
 ];
 
 const TABS_BOTTOM = [
-  { id: 'CAMPAIGNS', label: 'CAMPAIGNS', tooltip: 'New Lab Campaign' },
+  { id: 'CAMPAIGNS', label: 'CAMPAIGNS', tooltip: 'New Campaign' },
   { id: 'VEHICLES',  label: 'VEHICLES',  tooltip: 'Add Vehicle'      },
 ];
 
@@ -230,18 +230,20 @@ function BottomTab({ label, tooltip, active, onClick, onPlus }) {
     >
       {label}
       <span
-        onMouseEnter={e => { e.stopPropagation(); setPlusHovered(true); }}
+        onMouseEnter={e => { e.stopPropagation(); if (active) setPlusHovered(true); }}
         onMouseLeave={e => { e.stopPropagation(); setPlusHovered(false); }}
-        onClick={e => { e.stopPropagation(); onPlus?.(); }}
+        onClick={e => { e.stopPropagation(); if (active) onPlus?.(); }}
         style={{
           width: 20, height: 20, borderRadius: 5,
-          background: plusHovered ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)',
+          background: (active && plusHovered) ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'background 0.15s', position: 'relative',
+          transition: 'background 0.15s, opacity 0.15s', position: 'relative',
+          opacity: active ? 1 : 0.3,
+          cursor: active ? 'pointer' : 'not-allowed',
         }}
       >
         <PlusIcon />
-        {plusHovered && tooltip && (
+        {active && plusHovered && tooltip && (
           <div style={{
             position: 'absolute', bottom: 'calc(100% + 7px)', left: '50%',
             transform: 'translateX(-50%)',
@@ -551,7 +553,7 @@ function AVField({ label, value, onChange, type = 'text', maxLength, atLimit = f
           fontFamily:"'Inter', sans-serif", fontSize:13, fontWeight:500,
           color:'#ffffff', caretColor:'#ffffff',
           padding:'22px 12px 6px',
-          ...(isDate ? { colorScheme:'dark' } : {}),
+          ...(isDate ? { colorScheme:'dark', WebkitTextFillColor:'#ffffff' } : {}),
         }}
       />
     </div>
@@ -1210,7 +1212,7 @@ export default function TestUpdatesView({ activeNav, onNavChange, activeBrand, o
               tooltip={tab.tooltip}
               active={activeBottomTab === tab.id}
               onClick={() => handleBottomTabChange(tab.id)}
-              onPlus={tab.id === 'VEHICLES' ? () => { handleBottomTabChange('VEHICLES'); setAddVehicleOpen(true); } : undefined}
+              onPlus={tab.id === 'VEHICLES' ? () => setAddVehicleOpen(true) : undefined}
             />
           ))}
         </div>

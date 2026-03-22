@@ -235,19 +235,21 @@ function BottomTab({ label, tooltip, active, onClick, onPlus }) {
     >
       {label}
       <span
-        onMouseEnter={e => { e.stopPropagation(); setPlusHovered(true); }}
+        onMouseEnter={e => { e.stopPropagation(); if (active) setPlusHovered(true); }}
         onMouseLeave={e => { e.stopPropagation(); setPlusHovered(false); }}
-        onClick={e => { e.stopPropagation(); onPlus?.(); }}
+        onClick={e => { e.stopPropagation(); if (active) onPlus?.(); }}
         style={{
           width: 20, height: 20, borderRadius: 5,
-          background: plusHovered ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)',
+          background: (active && plusHovered) ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.1)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'background 0.15s',
+          transition: 'background 0.15s, opacity 0.15s',
           position: 'relative',
+          opacity: active ? 1 : 0.3,
+          cursor: active ? 'pointer' : 'not-allowed',
         }}
       >
         <PlusIcon />
-        {plusHovered && tooltip && (
+        {active && plusHovered && tooltip && (
           <div style={{
             position: 'absolute', bottom: 'calc(100% + 7px)', left: '50%',
             transform: 'translateX(-50%)',
@@ -1688,7 +1690,7 @@ export default function DashboardView({ activeBrand, onBrandChange, onLogout }) 
               tooltip={tab.tooltip}
               active={activeBottomTab === tab.id}
               onClick={() => handleBottomTabChange(tab.id)}
-              onPlus={tab.id === 'CRITERIONS' ? () => { handleBottomTabChange('CRITERIONS'); setAddVariableOpen(true); } : tab.id === 'CAMPAIGNS' ? () => { handleBottomTabChange('CAMPAIGNS'); setNewCampaignOpen(true); } : undefined}
+              onPlus={tab.id === 'CRITERIONS' ? () => setAddVariableOpen(true) : tab.id === 'CAMPAIGNS' ? () => setNewCampaignOpen(true) : undefined}
             />
           ))}
         </div>
