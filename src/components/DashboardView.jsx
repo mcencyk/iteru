@@ -926,6 +926,58 @@ function VariableDetailView({ variable, onBack, onNavChange, activeBrand, onBran
 }
 
 // ─── New Variable Modal ───────────────────────────────────────────────────────
+function VarInput({ label, value, onChange }) {
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const inputRef = React.useRef(null);
+  const floated = focused || value.length > 0;
+  const borderColor = focused ? '#28779c' : hovered ? '#2a6a87' : '#16506c';
+  const bgColor     = focused ? 'rgba(0,70,102,0.24)' : hovered ? 'rgba(0,70,102,0.22)' : 'rgba(0,70,102,0.16)';
+  const shadow      = focused ? '0px 0px 8px 0px rgba(40,119,156,0.32), inset 0px 0px 4px 0px rgba(0,0,0,0.24)' : '0px 1px 2px 0px rgba(0,0,0,0.12)';
+  return (
+    <div
+      onClick={() => inputRef.current?.focus()}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex', alignItems: 'center', height: 44,
+        borderRadius: 6, border: `1px solid ${borderColor}`,
+        background: bgColor, boxShadow: shadow, cursor: 'text',
+        transition: 'border-color 0.15s, box-shadow 0.15s, background 0.15s', overflow: 'hidden',
+      }}
+    >
+      <div style={{ position: 'relative', flex: 1, height: '100%' }}>
+        <label style={{
+          position: 'absolute', left: 12,
+          top: floated ? 6 : '50%',
+          transform: floated ? 'none' : 'translateY(-50%)',
+          fontFamily: "'Inter',sans-serif", fontSize: floated ? 10 : 12, fontWeight: 500,
+          lineHeight: '14px', color: '#80b0c8', opacity: floated ? 1 : 0.6,
+          pointerEvents: 'none',
+          transition: 'top 0.15s, font-size 0.15s, opacity 0.15s, transform 0.15s',
+          whiteSpace: 'nowrap',
+        }}>
+          {label}
+        </label>
+        <input
+          ref={inputRef}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={{
+            position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
+            background: 'transparent', border: 'none', outline: 'none',
+            fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500,
+            color: '#ffffff', caretColor: '#ffffff',
+            padding: '18px 0 4px 12px',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function NewVariableModal({ onClose }) {
   const [closing, setClosing] = useState(false);
   const [mode, setMode] = useState(null); // null | 'manual' | 'import'
@@ -978,7 +1030,6 @@ function NewVariableModal({ onClose }) {
   const canImport = importSource !== null && !importDone;
 
   const overlay = { fontSize: 9, fontWeight: 700, letterSpacing: 1, color: 'rgba(128,176,200,0.5)', fontFamily: "'Inter',sans-serif", marginBottom: 6, textTransform: 'uppercase' };
-  const inputStyle = { background: 'rgba(0,50,74,0.4)', border: '1px solid #1e5570', borderRadius: 8, padding: '10px 12px', fontSize: 12, fontWeight: 500, color: '#ffffff', fontFamily: "'Inter',sans-serif", outline: 'none', width: '100%', boxSizing: 'border-box', transition: 'border-color 0.15s' };
 
   return (
     <>
@@ -1033,8 +1084,7 @@ function NewVariableModal({ onClose }) {
               Back
             </button>
             <div>
-              <div style={overlay}>Variable Name</div>
-              <input value={varName} onChange={e => setVarName(e.target.value)} placeholder="e.g. ECU Firmware Baseline Config" style={inputStyle} />
+              <VarInput label="Variable Name" value={varName} onChange={setVarName} />
             </div>
             <div>
               <div style={overlay}>File (xlsx / csv)</div>
@@ -1102,8 +1152,7 @@ function NewVariableModal({ onClose }) {
             </div>
             {importSource && !importDone && (
               <div>
-                <div style={overlay}>File / Path</div>
-                <input value={importQuery} onChange={e => setImportQuery(e.target.value)} placeholder="e.g. /configs/ecu_baseline.xlsx" style={inputStyle} />
+                <VarInput label="File / Path" value={importQuery} onChange={setImportQuery} />
               </div>
             )}
             {importDone && (
