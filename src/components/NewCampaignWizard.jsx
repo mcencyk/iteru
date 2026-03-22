@@ -28,6 +28,12 @@ const SpinnerIcon = () => (
     <path d="M12 2a10 10 0 0 1 10 10" />
   </svg>
 );
+const GearIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+);
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 const BASE_DATA_OPTIONS = [
@@ -427,6 +433,7 @@ function WizardInput({ value, onChange, placeholder, width, height = 30 }) {
       onBlur={() => setFocused(false)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      className="wizard-input"
       style={{
         width, height, padding: '0 10px', borderRadius: 6,
         border: focused ? '1px solid #28779c' : hovered ? '1px solid #2a6a87' : '1px solid #16506c',
@@ -735,51 +742,213 @@ function EmptyState({ label }) {
   );
 }
 
-// ─── Step 2: INTERVALS ───────────────────────────────────────────────────────
-function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, currentFilterGroups, onAddInterval, onRemoveInterval, onAddFilterGroup, onRemoveFilterGroup, onUpdateFilterGroup, onAddFilter, onRemoveFilter, onUpdateFilter }) {
-  const [calculated, setCalculated] = useState(false);
+const TOTAL_POOL = 248342;
 
-  const calcRows = [
-    { country: 'Germany',     vehicles: 1842 },
-    { country: 'Austria',     vehicles: 312  },
-    { country: 'Poland',      vehicles: 228  },
-    { country: 'Switzerland', vehicles: 145  },
-  ];
+
+// ─── Info icon with portal tooltip ───────────────────────────────────────────
+function InfoIcon({ tooltip }) {
+  const [hov, setHov] = useState(false);
+  const [rect, setRect] = useState(null);
+  const ref = useRef(null);
+  return (
+    <>
+      <div
+        ref={ref}
+        onMouseEnter={() => { setRect(ref.current?.getBoundingClientRect()); setHov(true); }}
+        onMouseLeave={() => setHov(false)}
+        style={{ width: 14, height: 14, borderRadius: '50%', border: '1px solid rgba(128,176,200,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'default', flexShrink: 0 }}
+      >
+        <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(128,176,200,0.55)', fontFamily: F, lineHeight: 1, userSelect: 'none' }}>i</span>
+      </div>
+      {hov && rect && ReactDOM.createPortal(
+        <div style={{ position: 'fixed', top: rect.bottom + 6, right: window.innerWidth - rect.right, maxWidth: 230, background: '#012d42', border: '1px solid #153f53', borderRadius: 8, padding: '8px 10px', zIndex: 9999, pointerEvents: 'none', fontSize: 10, fontWeight: 500, color: 'rgba(204,223,233,0.8)', fontFamily: F, lineHeight: 1.55, whiteSpace: 'pre-line', boxShadow: '0 4px 16px rgba(0,0,0,0.45)' }}>
+          {tooltip}
+        </div>,
+        document.body
+      )}
+    </>
+  );
+}
+
+// ─── Add-filter button (shows AND/OR picker for 2nd+ filter) ─────────────────
+function AddFilterBtn({ hasFilters, onSelect }) {
+  const [open, setOpen] = useState(false);
+  const [hov, setHov] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+  function handleClick() {
+    if (!hasFilters) { onSelect(null); return; }
+    setOpen(o => !o);
+  }
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+      <button
+        onClick={handleClick}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid rgba(21,63,83,0.8)', background: 'transparent', color: 'rgba(128,176,200,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, transition: 'all 0.12s' }}
+        onMouseEnter={e => { setHov(true); e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'rgba(0,70,102,0.3)'; }}
+        onMouseLeave={e => { setHov(false); e.currentTarget.style.borderColor = 'rgba(21,63,83,0.8)'; e.currentTarget.style.color = 'rgba(128,176,200,0.55)'; e.currentTarget.style.background = 'transparent'; }}
+      >
+        <PlusIcon />
+      </button>
+      {hov && !open && (
+        <div style={{ position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%', transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 100, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
+          ADD FILTER
+        </div>
+      )}
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, background: '#012d42', border: '1px solid #153f53', borderRadius: 8, boxShadow: '0 6px 16px rgba(0,0,0,0.45)', overflow: 'hidden', zIndex: 50, minWidth: 64 }}>
+          {['AND', 'OR'].map((conn, i) => (
+            <div
+              key={conn}
+              onClick={() => { onSelect(conn); setOpen(false); }}
+              style={{ padding: '7px 12px', cursor: 'pointer', fontSize: 10, fontWeight: 700, fontFamily: F, color: conn === 'AND' ? '#4ea8c8' : '#a78bfa', borderBottom: i === 0 ? '1px solid rgba(21,63,83,0.5)' : 'none', transition: 'background 0.1s', letterSpacing: 0.5 }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,70,102,0.32)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              {conn}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Step 2: INTERVALS ───────────────────────────────────────────────────────
+function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, currentFilterGroups, onAddInterval, onRemoveInterval, onAddFilterGroup, onRemoveFilterGroup, onUpdateFilterGroup, onAddFilter, onRemoveFilter, onUpdateFilter, filterGroupsMap, onRecalculatingChange }) {
+  const [intervalVehicles, setIntervalVehicles] = useState(() => {
+    const v = { ungrouped: TOTAL_POOL };
+    intervals.forEach(i => { if (!i.fixed) v[i.id] = 0; });
+    return v;
+  });
+  const [recalculating, setRecalculating] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [gearHov, setGearHov] = useState(false);
+  const [gearRect, setGearRect] = useState(null);
+  const gearRef = useRef(null);
+
+  // Sync intervalVehicles when intervals list changes (removal returns vehicles to ungrouped)
+  useEffect(() => {
+    const allIds = new Set(intervals.map(i => i.id));
+    setIntervalVehicles(prev => {
+      const next = { ungrouped: prev.ungrouped || TOTAL_POOL };
+      let returned = 0;
+      Object.entries(prev).forEach(([id, v]) => {
+        if (id === 'ungrouped') return;
+        if (allIds.has(id)) next[id] = v;
+        else returned += v;
+      });
+      next.ungrouped += returned;
+      intervals.forEach(i => { if (!i.fixed && !(i.id in next)) next[i.id] = 0; });
+      return next;
+    });
+  }, [intervals]);
+
+  function handleRecalculate() {
+    if (recalculating) return;
+    const activeIntervals = intervals.filter(i => !i.fixed && (filterGroupsMap[i.id] || []).some(fg => fg.filters.length > 0));
+    const fgSnapshot = filterGroupsMap;
+
+    setRecalculating(true);
+    onRecalculatingChange(true);
+
+    setTimeout(() => {
+      const newV = { ungrouped: TOTAL_POOL };
+      intervals.forEach(i => { if (!i.fixed) newV[i.id] = 0; });
+      let remaining = TOTAL_POOL;
+      activeIntervals.forEach(i => {
+        const filterCount = (fgSnapshot[i.id] || []).reduce((sum, fg) => sum + fg.filters.length, 0);
+        const base = Math.min(remaining * 0.22, 12000 + filterCount * 9000);
+        const allocation = Math.round(base * (0.78 + Math.random() * 0.44));
+        const actual = Math.min(allocation, remaining - 15000);
+        if (actual > 0) { newV[i.id] = actual; remaining -= actual; }
+      });
+      newV.ungrouped = remaining;
+      setIntervalVehicles(newV);
+      setRecalculating(false);
+      onRecalculatingChange(false);
+    }, 1100 + Math.random() * 700);
+  }
 
   return (
     <div style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: '16px 24px 24px', gap: 12 }}>
       {/* Left: intervals list */}
-      <div style={{ width: 176, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <button
-          onClick={onAddInterval}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, border: '1px solid #16506c', background: 'rgba(0,70,102,0.22)', color: 'rgba(128,176,200,0.8)', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: 'pointer', transition: 'all 0.12s', alignSelf: 'flex-start' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,70,102,0.4)'; e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ffffff'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,70,102,0.22)'; e.currentTarget.style.borderColor = '#16506c'; e.currentTarget.style.color = 'rgba(128,176,200,0.8)'; }}
-        >
-          <PlusIcon /> ADD INTERVAL
-        </button>
+      <div style={{ width: 184, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8, opacity: recalculating ? 0.4 : 1, pointerEvents: recalculating ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+        {/* Top bar: ADD INTERVAL + Gear icon */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <button
+            onClick={onAddInterval}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: 'pointer', transition: 'all 0.12s' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,90,130,0.7)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,70,102,0.55)'}
+          >
+            <PlusIcon /> ADD INTERVAL
+          </button>
+          {/* Gear button */}
+          <button
+            ref={gearRef}
+            onClick={() => setRulesOpen(o => !o)}
+            onMouseEnter={e => { setGearRect(gearRef.current?.getBoundingClientRect()); setGearHov(true); e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'rgba(0,70,102,0.3)'; }}
+            onMouseLeave={e => { setGearHov(false); if (!rulesOpen) { e.currentTarget.style.borderColor = 'rgba(21,63,83,0.8)'; e.currentTarget.style.color = 'rgba(128,176,200,0.55)'; e.currentTarget.style.background = 'transparent'; } }}
+            style={{ width: 24, height: 24, borderRadius: 6, border: rulesOpen ? '1px solid #28779c' : '1px solid rgba(21,63,83,0.8)', background: rulesOpen ? 'rgba(0,70,102,0.4)' : 'transparent', color: rulesOpen ? '#ffffff' : 'rgba(128,176,200,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, transition: 'all 0.12s' }}
+          >
+            <GearIcon />
+          </button>
+          {gearHov && gearRect && ReactDOM.createPortal(
+            <div style={{ position: 'fixed', top: gearRect.bottom + 6, left: gearRect.left + gearRect.width / 2, transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
+              Intervals thresholds
+            </div>,
+            document.body
+          )}
+        </div>
+
+        {/* Collapsible rules panel */}
+        <div className={`filter-panel-wrapper${rulesOpen ? ' open' : ''}`} style={{ flexShrink: 0 }}>
+          <div className="filter-panel-inner">
+            <div style={{ background: 'rgba(0,15,28,0.65)', border: '1px solid rgba(21,63,83,0.7)', borderRadius: 8, padding: '10px 12px', marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.55)', letterSpacing: 0.8, fontFamily: F, textTransform: 'uppercase' }}>Intervals thresholds</div>
+                <InfoIcon tooltip={'Success rate: the percentage of successful vehicle updates that triggers automatic advancement to the next interval.\n\nFailure rate: the percentage of failed updates that automatically pauses the campaign to prevent further issues.'} />
+              </div>
+              {[
+                { label: 'Success rate:', key: 'success' },
+                { label: 'Failure rate:', key: 'failure' },
+              ].map(r => (
+                <div key={r.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontSize: 10, fontWeight: 500, fontFamily: F, color: 'rgba(204,223,233,0.65)', flex: 1, paddingRight: 6 }}>{r.label}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+                    <WizardInput value={rules[r.key]} onChange={v => setRules(pr => ({ ...pr, [r.key]: v }))} width={44} />
+                    <span style={{ fontSize: 10, fontWeight: 500, fontFamily: F, color: 'rgba(128,176,200,0.55)' }}>%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
           {intervals.map(interval => {
             const isActive = selIntervalId === interval.id;
+            const vCount = intervalVehicles[interval.id] ?? 0;
             return (
               <div
                 key={interval.id}
                 onClick={() => setSelIntervalId(interval.id)}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '8px 10px', borderRadius: 8, cursor: 'pointer',
-                  background: isActive ? 'rgba(0,65,96,0.7)' : 'rgba(0,45,68,0.4)',
-                  border: isActive ? '1px solid #28779c' : '1px solid rgba(21,63,83,0.6)',
-                  transition: 'background 0.12s, border-color 0.12s',
-                }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 8, cursor: 'pointer', background: isActive ? 'rgba(0,65,96,0.7)' : 'rgba(0,45,68,0.4)', border: isActive ? '1px solid #28779c' : '1px solid rgba(21,63,83,0.6)', transition: 'background 0.12s, border-color 0.12s' }}
                 onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(0,55,80,0.5)'; }}
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'rgba(0,45,68,0.4)'; }}
               >
-                <div>
-                  {!interval.fixed && (
-                    <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(128,176,200,0.45)', fontFamily: F, letterSpacing: 0.5, textTransform: 'uppercase' }}>Interval</div>
-                  )}
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 11, fontWeight: 600, fontFamily: F, color: isActive ? '#ffffff' : 'rgba(204,223,233,0.75)' }}>{interval.name}</div>
+                  <div style={{ fontSize: 9, fontWeight: 500, fontFamily: F, color: isActive ? 'rgba(128,210,230,0.7)' : 'rgba(128,176,200,0.45)', marginTop: 2 }}>
+                    {vCount.toLocaleString()} vehicles
+                  </div>
                 </div>
                 {!interval.fixed && (
                   <RemoveBtn onConfirm={() => onRemoveInterval(interval.id)} label="Remove interval?" />
@@ -790,67 +959,50 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
         </div>
       </div>
 
-      {/* Middle: parameters */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
+      {/* Middle: rule groups */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, overflow: 'hidden', opacity: recalculating ? 0.4 : 1, pointerEvents: recalculating ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
         <button
           onClick={onAddFilterGroup}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, border: '1px solid #16506c', background: 'rgba(0,70,102,0.22)', color: 'rgba(128,176,200,0.8)', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: 'pointer', transition: 'all 0.12s', alignSelf: 'flex-start', flexShrink: 0 }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,70,102,0.4)'; e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ffffff'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,70,102,0.22)'; e.currentTarget.style.borderColor = '#16506c'; e.currentTarget.style.color = 'rgba(128,176,200,0.8)'; }}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: 'pointer', transition: 'all 0.12s', alignSelf: 'flex-start', flexShrink: 0 }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,90,130,0.7)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,70,102,0.55)'}
         >
-          <PlusIcon /> ADD FILTER GROUP
+          <PlusIcon /> ADD RULES GROUP
         </button>
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingRight: 2 }}>
-          {/* RULES section */}
-          <div style={{ background: 'rgba(0,30,46,0.5)', border: '1px solid rgba(21,63,83,0.7)', borderRadius: 10, padding: '12px 14px', flexShrink: 0 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.55)', letterSpacing: 0.8, fontFamily: F, marginBottom: 10, textTransform: 'uppercase' }}>Rules</div>
-            {[
-              { label: 'Auto start next interval when success rate reaches:', key: 'success' },
-              { label: 'Auto pause campaign when failure rate reaches:', key: 'failure' },
-            ].map(r => (
-              <div key={r.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: 11, fontWeight: 500, fontFamily: F, color: 'rgba(204,223,233,0.7)', flex: 1 }}>{r.label}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                  <WizardInput value={rules[r.key]} onChange={v => setRules(pr => ({ ...pr, [r.key]: v }))} width={52} />
-                  <span style={{ fontSize: 11, fontWeight: 500, fontFamily: F, color: 'rgba(128,176,200,0.6)' }}>%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Filter groups */}
           {currentFilterGroups.length === 0 && (
-            <div style={{ padding: '20px', textAlign: 'center', color: 'rgba(128,176,200,0.3)', fontSize: 11, fontFamily: F }}>
-              No filter groups. Click "ADD FILTER GROUP" to define vehicle filters.
+            <div style={{ padding: '12px 14px', borderRadius: 10, background: 'rgba(0,50,80,0.18)', border: '1px solid rgba(40,119,156,0.22)', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', flexShrink: 0 }}>
+              <div style={{ fontSize: 10, fontWeight: 500, color: 'rgba(128,176,200,0.45)', fontFamily: F, lineHeight: 1.5 }}>Click <span style={{ color: 'rgba(128,190,220,0.65)', fontWeight: 700 }}>ADD RULES GROUP</span> to start defining vehicle filters for this interval.</div>
             </div>
           )}
           {currentFilterGroups.map((fg, fgi) => (
             <div key={fg.id} style={{ background: 'rgba(0,30,46,0.5)', border: '1px solid rgba(21,63,83,0.7)', borderRadius: 10, padding: '12px 14px', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.55)', letterSpacing: 0.8, fontFamily: F, textTransform: 'uppercase' }}>Filter Group {fgi + 1}</div>
-                <RemoveBtn onConfirm={() => onRemoveFilterGroup(fg.id)} label="Remove filter group?" />
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.55)', letterSpacing: 0.8, fontFamily: F, textTransform: 'uppercase' }}>Rule Group {fgi + 1}</div>
+                <RemoveBtn onConfirm={() => onRemoveFilterGroup(fg.id)} label="Remove rule group?" />
               </div>
               {fg.filters.map(f => (
-                <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <MiniDropdown options={FILTER_TYPES} value={f.type} onChange={v => onUpdateFilter(fg.id, f.id, 'type', v)} placeholder="Type" width={110} />
-                  <MiniDropdown options={FILTER_OPERATORS} value={f.operator} onChange={v => onUpdateFilter(fg.id, f.id, 'operator', v)} placeholder="Operator" width={110} />
-                  <div style={{ flex: 1 }}>
-                    <WizardInput value={f.value} onChange={v => onUpdateFilter(fg.id, f.id, 'value', v)} placeholder="Value…" width="100%" height={30} />
+                <div key={f.id}>
+                  {f.connector && (
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 2 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 7px', borderRadius: 4, background: f.connector === 'AND' ? 'rgba(78,168,200,0.12)' : 'rgba(167,139,250,0.12)', border: `1px solid ${f.connector === 'AND' ? 'rgba(78,168,200,0.35)' : 'rgba(167,139,250,0.35)'}`, color: f.connector === 'AND' ? '#4ea8c8' : '#a78bfa', fontSize: 8, fontWeight: 700, fontFamily: F, letterSpacing: 0.8 }}>
+                        {f.connector}
+                      </span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                    <MiniDropdown options={FILTER_TYPES} value={f.type} onChange={v => onUpdateFilter(fg.id, f.id, 'type', v)} placeholder="Type" width={110} />
+                    <MiniDropdown options={FILTER_OPERATORS} value={f.operator} onChange={v => onUpdateFilter(fg.id, f.id, 'operator', v)} placeholder="Operator" width={110} />
+                    <div style={{ flex: 1 }}>
+                      <WizardInput value={f.value} onChange={v => onUpdateFilter(fg.id, f.id, 'value', v)} placeholder="Value…" width="100%" height={30} />
+                    </div>
+                    <RemoveBtn onConfirm={() => onRemoveFilter(fg.id, f.id)} label="Remove filter?" />
                   </div>
-                  <RemoveBtn onConfirm={() => onRemoveFilter(fg.id, f.id)} label="Remove filter?" />
                 </div>
               ))}
-              {/* Add filter — "+" icon bottom-left */}
-              <div style={{ marginTop: fg.filters.length > 0 ? 6 : 0 }}>
-                <button
-                  onClick={() => onAddFilter(fg.id)}
-                  style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid rgba(21,63,83,0.8)', background: 'transparent', color: 'rgba(128,176,200,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, transition: 'all 0.12s' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'rgba(0,70,102,0.3)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(21,63,83,0.8)'; e.currentTarget.style.color = 'rgba(128,176,200,0.55)'; e.currentTarget.style.background = 'transparent'; }}
-                >
-                  <PlusIcon />
-                </button>
+              <div style={{ marginTop: fg.filters.length > 0 ? 4 : 0 }}>
+                <AddFilterBtn hasFilters={fg.filters.length > 0} onSelect={conn => onAddFilter(fg.id, conn)} />
               </div>
             </div>
           ))}
@@ -858,34 +1010,34 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
       </div>
 
       {/* Right: calculations */}
-      <div style={{ width: 190, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ width: 190, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
         <button
-          onClick={() => setCalculated(true)}
-          style={{ padding: '3px 8px', borderRadius: 6, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: 'pointer', transition: 'all 0.12s', alignSelf: 'flex-start' }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,90,130,0.7)'}
+          onClick={handleRecalculate}
+          disabled={recalculating}
+          style={{ padding: '3px 8px', borderRadius: 6, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: recalculating ? 'default' : 'pointer', transition: 'all 0.12s', alignSelf: 'flex-start', position: 'relative' }}
+          onMouseEnter={e => { if (!recalculating) e.currentTarget.style.background = 'rgba(0,90,130,0.7)'; }}
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,70,102,0.55)'}
         >
-          CALCULATE
+          <span style={{ opacity: recalculating ? 0 : 1 }}>RECALCULATE</span>
+          {recalculating && (
+            <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <SpinnerIcon />
+            </span>
+          )}
         </button>
-        <div style={{ flex: 1, background: 'rgba(0,30,46,0.5)', border: '1px solid rgba(21,63,83,0.7)', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, background: 'rgba(0,30,46,0.5)', border: '1px solid rgba(21,63,83,0.7)', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column', opacity: recalculating ? 0.4 : 1, transition: 'opacity 0.2s' }}>
           <div style={{ display: 'flex', borderBottom: '1px solid rgba(21,63,83,0.7)', background: 'rgba(1,38,58,0.6)', flexShrink: 0 }}>
-            {['COUNTRY', 'VEHICLES'].map(h => (
+            {['INTERVAL', 'VEHICLES'].map(h => (
               <div key={h} style={{ flex: 1, padding: '7px 10px', fontSize: 8, fontWeight: 700, color: 'rgba(128,176,200,0.5)', letterSpacing: 0.7, fontFamily: F }}>{h}</div>
             ))}
           </div>
           <div style={{ flex: 1, overflowY: 'auto' }}>
-            {!calculated ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '16px 10px', fontSize: 10, fontWeight: 500, fontFamily: F, color: 'rgba(128,176,200,0.3)', lineHeight: 1.5, textAlign: 'center' }}>
-                Request a calculation to see vehicle assignment.
+            {intervals.map((interval, i) => (
+              <div key={interval.id} style={{ display: 'flex', padding: '7px 10px', borderBottom: '1px solid rgba(21,63,83,0.3)', background: i % 2 === 0 ? 'transparent' : 'rgba(0,50,74,0.12)' }}>
+                <div style={{ flex: 1, fontSize: 11, fontWeight: 500, fontFamily: F, color: 'rgba(204,223,233,0.8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{interval.name}</div>
+                <div style={{ flex: 1, fontSize: 11, fontWeight: 600, fontFamily: F, color: '#ffffff' }}>{(intervalVehicles[interval.id] ?? 0).toLocaleString()}</div>
               </div>
-            ) : (
-              calcRows.map((r, i) => (
-                <div key={i} style={{ display: 'flex', padding: '7px 10px', borderBottom: '1px solid rgba(21,63,83,0.3)', background: i % 2 === 0 ? 'transparent' : 'rgba(0,50,74,0.12)' }}>
-                  <div style={{ flex: 1, fontSize: 11, fontWeight: 500, fontFamily: F, color: 'rgba(204,223,233,0.8)' }}>{r.country}</div>
-                  <div style={{ flex: 1, fontSize: 11, fontWeight: 600, fontFamily: F, color: '#ffffff' }}>{r.vehicles.toLocaleString()}</div>
-                </div>
-              ))
-            )}
+            ))}
           </div>
         </div>
       </div>
@@ -1063,6 +1215,7 @@ export default function NewCampaignWizard({ onClose, onSuccess }) {
 
   const [discardOpen, setDiscardOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [recalculating, setRecalculating] = useState(false);
   function handleClose() { setDiscardOpen(true); }
   function handleConfirmDiscard() { setDiscardOpen(false); setClosing(true); }
   function handleConfirm() {
@@ -1102,8 +1255,8 @@ export default function NewCampaignWizard({ onClose, onSuccess }) {
   function updateFilterGroup(fgId, key, value) {
     setFilterGroupsMap(prev => ({ ...prev, [selIntervalId]: prev[selIntervalId].map(fg => fg.id === fgId ? { ...fg, [key]: value } : fg) }));
   }
-  function addFilter(fgId) {
-    const f = { id: uid(), type: '', operator: '', value: '' };
+  function addFilter(fgId, connector = null) {
+    const f = { id: uid(), connector, type: '', operator: '', value: '' };
     setFilterGroupsMap(prev => ({ ...prev, [selIntervalId]: prev[selIntervalId].map(fg => fg.id === fgId ? { ...fg, filters: [...fg.filters, f] } : fg) }));
   }
   function removeFilter(fgId, filterId) {
@@ -1145,7 +1298,7 @@ export default function NewCampaignWizard({ onClose, onSuccess }) {
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', height: 52, borderBottom: '1px solid rgba(21,63,83,0.7)', flexShrink: 0, borderRadius: '20px 20px 0 0', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', height: 52, borderBottom: '1px solid rgba(21,63,83,0.7)', flexShrink: 0, borderRadius: '20px 20px 0 0', overflow: 'hidden', opacity: recalculating ? 0.4 : 1, pointerEvents: recalculating ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
           <span style={{ fontSize: 16, fontWeight: 700, fontFamily: "'Montserrat', sans-serif", color: '#ffffff', letterSpacing: 0.3 }}>
             NEW CAMPAIGN
           </span>
@@ -1153,7 +1306,9 @@ export default function NewCampaignWizard({ onClose, onSuccess }) {
         </div>
 
         {/* Step indicator */}
-        <StepIndicator step={step} />
+        <div style={{ opacity: recalculating ? 0.4 : 1, transition: 'opacity 0.2s', pointerEvents: recalculating ? 'none' : 'auto' }}>
+          <StepIndicator step={step} />
+        </div>
 
         {/* Content */}
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
@@ -1172,10 +1327,12 @@ export default function NewCampaignWizard({ onClose, onSuccess }) {
               intervals={intervals} selIntervalId={selIntervalId} setSelIntervalId={setSelIntervalId}
               rules={rules} setRules={setRules}
               currentFilterGroups={currentFilterGroups}
+              filterGroupsMap={filterGroupsMap}
               onAddInterval={addInterval} onRemoveInterval={removeInterval}
               onAddFilterGroup={addFilterGroup} onRemoveFilterGroup={removeFilterGroup}
               onUpdateFilterGroup={updateFilterGroup}
               onAddFilter={addFilter} onRemoveFilter={removeFilter} onUpdateFilter={updateFilter}
+              onRecalculatingChange={setRecalculating}
             />
           )}
           {step === 3 && (
@@ -1192,7 +1349,7 @@ export default function NewCampaignWizard({ onClose, onSuccess }) {
         </div>
 
         {/* Navigation */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderTop: '1px solid rgba(21,63,83,0.7)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px', borderTop: '1px solid rgba(21,63,83,0.7)', flexShrink: 0, opacity: recalculating ? 0.4 : 1, pointerEvents: recalculating ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
           {/* Left: BACK */}
           <div>
             {step > 1 && (
