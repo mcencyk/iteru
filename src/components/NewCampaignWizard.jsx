@@ -23,6 +23,17 @@ const CheckIcon = () => (
   </svg>
 );
 
+const CopyIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </svg>
+);
+const PasteIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+  </svg>
+);
+
 const SpinnerIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'iteruSpin 0.75s linear infinite', flexShrink: 0 }}>
     <path d="M12 2a10 10 0 0 1 10 10" />
@@ -770,56 +781,122 @@ function InfoIcon({ tooltip }) {
   );
 }
 
+// ─── Copy / Paste rule group buttons ─────────────────────────────────────────
+function CopyGroupBtn({ onCopy }) {
+  const [hov, setHov] = useState(false);
+  const [rect, setRect] = useState(null);
+  const ref = useRef(null);
+  const [copied, setCopied] = useState(false);
+  function handleClick() { onCopy(); setCopied(true); setTimeout(() => setCopied(false), 1200); }
+  return (
+    <div style={{ position: 'relative', display: 'inline-flex' }}>
+      <button
+        ref={ref}
+        onClick={handleClick}
+        style={{ width: 22, height: 22, borderRadius: 5, border: `1px solid ${copied ? 'rgba(40,119,156,0.6)' : 'rgba(21,63,83,0.7)'}`, background: copied ? 'rgba(0,70,102,0.3)' : 'transparent', color: copied ? '#80d0e8' : 'rgba(128,176,200,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, transition: 'all 0.12s' }}
+        onMouseEnter={e => { setRect(ref.current?.getBoundingClientRect()); setHov(true); e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'rgba(0,70,102,0.3)'; }}
+        onMouseLeave={e => { setHov(false); if (!copied) { e.currentTarget.style.borderColor = 'rgba(21,63,83,0.7)'; e.currentTarget.style.color = 'rgba(128,176,200,0.45)'; e.currentTarget.style.background = 'transparent'; } }}
+      >
+        <CopyIcon />
+      </button>
+      {hov && rect && ReactDOM.createPortal(
+        <div style={{ position: 'fixed', top: rect.top - 28, left: rect.left + rect.width / 2, transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
+          {copied ? 'COPIED' : 'COPY RULE GROUP'}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
+function PasteGroupBtn({ copied, onPaste }) {
+  const [hov, setHov] = useState(false);
+  const [rect, setRect] = useState(null);
+  const ref = useRef(null);
+  const active = !!copied;
+  return (
+    <div style={{ position: 'relative', display: 'inline-flex' }}>
+      <button
+        ref={ref}
+        onClick={() => { if (active) onPaste(); }}
+        style={{ width: 22, height: 22, borderRadius: 5, border: `1px solid ${active ? '#28779c' : 'rgba(21,63,83,0.5)'}`, background: active && hov ? 'rgba(0,90,130,0.45)' : active ? 'rgba(0,70,102,0.3)' : 'transparent', color: active ? '#80d0e8' : 'rgba(128,176,200,0.25)', cursor: active ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, transition: 'all 0.12s', opacity: active ? 1 : 0.4 }}
+        onMouseEnter={() => { if (active) { setRect(ref.current?.getBoundingClientRect()); setHov(true); } }}
+        onMouseLeave={() => setHov(false)}
+      >
+        <PasteIcon />
+      </button>
+      {hov && rect && active && ReactDOM.createPortal(
+        <div style={{ position: 'fixed', top: rect.top - 28, left: rect.left + rect.width / 2, transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
+          PASTE RULE GROUP
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
 // ─── Add-filter button (shows AND/OR picker for 2nd+ filter) ─────────────────
 function AddFilterBtn({ hasFilters, onSelect }) {
   const [open, setOpen] = useState(false);
   const [hov, setHov] = useState(false);
-  const ref = useRef(null);
+  const [btnRect, setBtnRect] = useState(null);
+  const btnRef = useRef(null);
+  const dropRef = useRef(null);
   useEffect(() => {
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const h = e => {
+      if (
+        btnRef.current && !btnRef.current.contains(e.target) &&
+        dropRef.current && !dropRef.current.contains(e.target)
+      ) setOpen(false);
+    };
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
   }, []);
   function handleClick() {
     if (!hasFilters) { onSelect(null); return; }
+    setBtnRect(btnRef.current?.getBoundingClientRect());
     setOpen(o => !o);
   }
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+    <div style={{ position: 'relative', display: 'inline-block' }}>
       <button
+        ref={btnRef}
         onClick={handleClick}
         style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid rgba(21,63,83,0.8)', background: 'transparent', color: 'rgba(128,176,200,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, transition: 'all 0.12s' }}
-        onMouseEnter={e => { setHov(true); e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'rgba(0,70,102,0.3)'; }}
+        onMouseEnter={e => { setBtnRect(btnRef.current?.getBoundingClientRect()); setHov(true); e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'rgba(0,70,102,0.3)'; }}
         onMouseLeave={e => { setHov(false); e.currentTarget.style.borderColor = 'rgba(21,63,83,0.8)'; e.currentTarget.style.color = 'rgba(128,176,200,0.55)'; e.currentTarget.style.background = 'transparent'; }}
       >
         <PlusIcon />
       </button>
-      {hov && !open && (
-        <div style={{ position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%', transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 100, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
+      {hov && !open && btnRect && ReactDOM.createPortal(
+        <div style={{ position: 'fixed', top: btnRect.top - 28, left: btnRect.left + btnRect.width / 2, transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
           ADD FILTER
-        </div>
+        </div>,
+        document.body
       )}
-      {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, background: '#012d42', border: '1px solid #153f53', borderRadius: 8, boxShadow: '0 6px 16px rgba(0,0,0,0.45)', overflow: 'hidden', zIndex: 50, minWidth: 64 }}>
+      {open && btnRect && ReactDOM.createPortal(
+        <div ref={dropRef} style={{ position: 'fixed', top: btnRect.bottom + 4, left: btnRect.left, background: '#012d42', border: '1px solid #153f53', borderRadius: 8, boxShadow: '0 6px 16px rgba(0,0,0,0.45)', overflow: 'hidden', zIndex: 9999, minWidth: 64 }}>
           {['AND', 'OR'].map((conn, i) => (
             <div
               key={conn}
               onClick={() => { onSelect(conn); setOpen(false); }}
-              style={{ padding: '7px 12px', cursor: 'pointer', fontSize: 10, fontWeight: 700, fontFamily: F, color: conn === 'AND' ? '#4ea8c8' : '#a78bfa', borderBottom: i === 0 ? '1px solid rgba(21,63,83,0.5)' : 'none', transition: 'background 0.1s', letterSpacing: 0.5 }}
+              style={{ padding: '7px 12px', cursor: 'pointer', fontSize: 10, fontWeight: 700, fontFamily: F, color: conn === 'AND' ? '#f59e0b' : '#a78bfa', borderBottom: i === 0 ? '1px solid rgba(21,63,83,0.5)' : 'none', transition: 'background 0.1s', letterSpacing: 0.5 }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,70,102,0.32)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               {conn}
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
 }
 
 // ─── Step 2: INTERVALS ───────────────────────────────────────────────────────
-function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, currentFilterGroups, onAddInterval, onRemoveInterval, onAddFilterGroup, onRemoveFilterGroup, onUpdateFilterGroup, onAddFilter, onRemoveFilter, onUpdateFilter, filterGroupsMap, onRecalculatingChange }) {
+function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, currentFilterGroups, onAddInterval, onRemoveInterval, onAddFilterGroup, onRemoveFilterGroup, onUpdateFilterGroup, onAddFilter, onRemoveFilter, onUpdateFilter, filterGroupsMap, onRecalculatingChange, onPasteFilterGroup }) {
+  const [copiedRuleGroup, setCopiedRuleGroup] = useState(null);
   const [intervalVehicles, setIntervalVehicles] = useState(() => {
     const v = { ungrouped: TOTAL_POOL };
     intervals.forEach(i => { if (!i.fixed) v[i.id] = 0; });
@@ -931,14 +1008,14 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {intervals.map(interval => {
+          {[...intervals].sort((a, b) => (b.isUngrouped ? 1 : 0) - (a.isUngrouped ? 1 : 0)).map(interval => {
             const isActive = selIntervalId === interval.id;
             const vCount = intervalVehicles[interval.id] ?? 0;
             return (
               <div
                 key={interval.id}
                 onClick={() => setSelIntervalId(interval.id)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 8, cursor: 'pointer', background: isActive ? 'rgba(0,65,96,0.7)' : 'rgba(0,45,68,0.4)', border: isActive ? '1px solid #28779c' : '1px solid rgba(21,63,83,0.6)', transition: 'background 0.12s, border-color 0.12s' }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 8, cursor: 'pointer', background: isActive ? 'rgba(0,65,96,0.7)' : 'rgba(0,45,68,0.4)', border: isActive ? '1px solid #28779c' : '1px solid rgba(21,63,83,0.6)', transition: 'background 0.12s, border-color 0.12s', animation: 'wiz-item-in 0.22s ease' }}
                 onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(0,55,80,0.5)'; }}
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'rgba(0,45,68,0.4)'; }}
               >
@@ -959,14 +1036,17 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
 
       {/* Middle: rule groups */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, overflow: 'hidden', opacity: recalculating ? 0.4 : 1, pointerEvents: recalculating ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
-        <button
-          onClick={onAddFilterGroup}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: 'pointer', transition: 'all 0.12s', alignSelf: 'flex-start', flexShrink: 0 }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,90,130,0.7)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,70,102,0.55)'}
-        >
-          <PlusIcon /> ADD RULES GROUP
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <button
+            onClick={onAddFilterGroup}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: 'pointer', transition: 'all 0.12s' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,90,130,0.7)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,70,102,0.55)'}
+          >
+            <PlusIcon /> ADD RULES GROUP
+          </button>
+          <PasteGroupBtn copied={copiedRuleGroup} onPaste={() => { onPasteFilterGroup(copiedRuleGroup); }} />
+        </div>
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingRight: 2 }}>
           {currentFilterGroups.length === 0 && (
@@ -975,16 +1055,19 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
             </div>
           )}
           {currentFilterGroups.map((fg, fgi) => (
-            <div key={fg.id} style={{ background: 'rgba(0,30,46,0.5)', border: '1px solid rgba(21,63,83,0.7)', borderRadius: 10, padding: '12px 14px', flexShrink: 0 }}>
+            <div key={fg.id} style={{ background: 'rgba(0,30,46,0.5)', border: '1px solid rgba(21,63,83,0.7)', borderRadius: 10, padding: '12px 14px', flexShrink: 0, animation: 'wiz-item-in 0.22s ease' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.55)', letterSpacing: 0.8, fontFamily: F, textTransform: 'uppercase' }}>Rule Group {fgi + 1}</div>
-                <RemoveBtn onConfirm={() => onRemoveFilterGroup(fg.id)} label="Remove rule group?" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <CopyGroupBtn onCopy={() => setCopiedRuleGroup({ filters: fg.filters })} />
+                  <RemoveBtn onConfirm={() => onRemoveFilterGroup(fg.id)} label="Remove rule group?" />
+                </div>
               </div>
               {fg.filters.map(f => (
                 <div key={f.id}>
                   {f.connector && (
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, marginTop: 2 }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 7px', borderRadius: 4, background: f.connector === 'AND' ? 'rgba(78,168,200,0.12)' : 'rgba(167,139,250,0.12)', border: `1px solid ${f.connector === 'AND' ? 'rgba(78,168,200,0.35)' : 'rgba(167,139,250,0.35)'}`, color: f.connector === 'AND' ? '#4ea8c8' : '#a78bfa', fontSize: 8, fontWeight: 700, fontFamily: F, letterSpacing: 0.8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginTop: 2 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 7px', borderRadius: 4, lineHeight: 1, background: f.connector === 'AND' ? 'rgba(245,158,11,0.12)' : 'rgba(167,139,250,0.12)', border: `1px solid ${f.connector === 'AND' ? 'rgba(245,158,11,0.35)' : 'rgba(167,139,250,0.35)'}`, color: f.connector === 'AND' ? '#f59e0b' : '#a78bfa', fontSize: 8, fontWeight: 700, fontFamily: F, letterSpacing: 0.8 }}>
                         {f.connector}
                       </span>
                     </div>
@@ -1030,7 +1113,7 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
             ))}
           </div>
           <div style={{ flex: 1, overflowY: 'auto' }}>
-            {intervals.map((interval, i) => (
+            {[...intervals].sort((a, b) => (b.isUngrouped ? 1 : 0) - (a.isUngrouped ? 1 : 0)).map((interval, i) => (
               <div key={interval.id} style={{ display: 'flex', padding: '7px 10px', borderBottom: '1px solid rgba(21,63,83,0.3)', background: i % 2 === 0 ? 'transparent' : 'rgba(0,50,74,0.12)' }}>
                 <div style={{ flex: 1, fontSize: 11, fontWeight: 500, fontFamily: F, color: 'rgba(204,223,233,0.8)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{interval.name}</div>
                 <div style={{ flex: 1, fontSize: 11, fontWeight: 600, fontFamily: F, color: '#ffffff' }}>{(intervalVehicles[interval.id] ?? 0).toLocaleString()}</div>
@@ -1247,6 +1330,11 @@ export default function NewCampaignWizard({ onClose, onSuccess }) {
     const fg = { id: uid(), vehicleLimit: '', filters: [] };
     setFilterGroupsMap(prev => ({ ...prev, [selIntervalId]: [...(prev[selIntervalId] || []), fg] }));
   }
+  function pasteFilterGroup(source) {
+    if (!source) return;
+    const fg = { id: uid(), vehicleLimit: '', filters: source.filters.map(f => ({ ...f, id: uid() })) };
+    setFilterGroupsMap(prev => ({ ...prev, [selIntervalId]: [...(prev[selIntervalId] || []), fg] }));
+  }
   function removeFilterGroup(fgId) {
     setFilterGroupsMap(prev => ({ ...prev, [selIntervalId]: prev[selIntervalId].filter(fg => fg.id !== fgId) }));
   }
@@ -1331,6 +1419,7 @@ export default function NewCampaignWizard({ onClose, onSuccess }) {
               onUpdateFilterGroup={updateFilterGroup}
               onAddFilter={addFilter} onRemoveFilter={removeFilter} onUpdateFilter={updateFilter}
               onRecalculatingChange={setRecalculating}
+              onPasteFilterGroup={pasteFilterGroup}
             />
           )}
           {step === 3 && (
