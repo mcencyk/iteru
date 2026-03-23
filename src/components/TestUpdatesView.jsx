@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import CampaignDetailView from './CampaignDetailView';
 import VehicleDetailView from './VehicleDetailView';
+import NewLabCampaignWizard from './NewLabCampaignWizard';
 
 // ─── Status config (only valid test statuses) ─────────────────────────────────
 const STATUS = {
@@ -743,6 +744,15 @@ export default function TestUpdatesView({ activeNav, onNavChange, activeBrand, o
   const [vehicleFilterHovered, setVehicleFilterHovered] = useState(false);
   const [vehicleFilters, setVehicleFilters] = useState({ statuses: [], auths: [], models: [], yearFrom: '', yearTo: '' });
   const [addVehicleOpen, setAddVehicleOpen] = useState(false);
+  const [newLabCampaignOpen, setNewLabCampaignOpen] = useState(false);
+  const [labCampaignToast, setLabCampaignToast] = useState(false);
+  const [labToastHiding, setLabToastHiding] = useState(false);
+  useEffect(() => {
+    if (!labCampaignToast) return;
+    const t1 = setTimeout(() => setLabToastHiding(true), 3400);
+    const t2 = setTimeout(() => { setLabCampaignToast(false); setLabToastHiding(false); }, 3800);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [labCampaignToast]);
   const [authCodeResult, setAuthCodeResult] = useState(null);
 
   const allVehicles = useMemo(() => generateLabVehicles(activeBrand?.id || 'vw'), [activeBrand?.id]);
@@ -1212,7 +1222,7 @@ export default function TestUpdatesView({ activeNav, onNavChange, activeBrand, o
               tooltip={tab.tooltip}
               active={activeBottomTab === tab.id}
               onClick={() => handleBottomTabChange(tab.id)}
-              onPlus={tab.id === 'VEHICLES' ? () => setAddVehicleOpen(true) : undefined}
+              onPlus={tab.id === 'VEHICLES' ? () => setAddVehicleOpen(true) : tab.id === 'CAMPAIGNS' ? () => setNewLabCampaignOpen(true) : undefined}
             />
           ))}
         </div>
@@ -1225,6 +1235,24 @@ export default function TestUpdatesView({ activeNav, onNavChange, activeBrand, o
       models={BRAND_MODELS[activeBrand?.id] || BRAND_MODELS.vw}
     />}
     {authCodeResult && <AuthCodeModal code={authCodeResult} onClose={() => setAuthCodeResult(null)} />}
+    {newLabCampaignOpen && (
+      <NewLabCampaignWizard
+        vehicles={generateLabVehicles(activeBrand?.id || 'vw')}
+        onClose={() => setNewLabCampaignOpen(false)}
+        onSuccess={() => { setNewLabCampaignOpen(false); setLabCampaignToast(true); }}
+      />
+    )}
+    {labCampaignToast && (
+      <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 999, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 12, background: 'rgba(0,28,18,0.88)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(40,160,70,0.45)', boxShadow: '0 4px 16px rgba(0,0,0,0.32), 0 0 0 1px rgba(40,160,70,0.12)', animation: labToastHiding ? 'toastSlideOut 0.32s ease forwards' : 'toastSlideIn 0.28s ease forwards', maxWidth: 300, pointerEvents: 'none' }}>
+        <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, background: 'rgba(40,160,70,0.25)', border: '1px solid rgba(40,200,100,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#40e080" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#40e080', fontFamily: "'Inter', sans-serif", letterSpacing: 0.3 }}>Campaign Started</div>
+          <div style={{ fontSize: 10, fontWeight: 500, color: 'rgba(40,200,100,0.7)', fontFamily: "'Inter', sans-serif", marginTop: 2 }}>Campaign was created and is now running on selected vehicles.</div>
+        </div>
+      </div>
+    )}
   </>
   );
 }

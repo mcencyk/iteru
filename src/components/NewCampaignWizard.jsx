@@ -825,14 +825,14 @@ function PasteGroupBtn({ copied, onPaste }) {
       <button
         ref={ref}
         onClick={() => { if (active) onPaste(); }}
-        style={{ width: 22, height: 22, borderRadius: 5, border: `1px solid ${active ? '#28779c' : 'rgba(21,63,83,0.5)'}`, background: active && hov ? 'rgba(0,90,130,0.45)' : active ? 'rgba(0,70,102,0.3)' : 'transparent', color: active ? '#80d0e8' : 'rgba(128,176,200,0.25)', cursor: active ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, transition: 'all 0.12s', opacity: active ? 1 : 0.4 }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 36, padding: '0 12px', boxSizing: 'border-box', borderRadius: 8, border: `1px solid ${active ? '#28779c' : 'rgba(21,63,83,0.5)'}`, background: active && hov ? 'rgba(0,90,130,0.7)' : active ? 'rgba(0,70,102,0.55)' : 'rgba(0,40,60,0.3)', color: active ? '#ffffff' : 'rgba(128,176,200,0.25)', cursor: active ? 'pointer' : 'default', transition: 'all 0.12s', opacity: active ? 1 : 0.45, fontSize: 11, fontFamily: F }}
         onMouseEnter={() => { if (active) { setRect(ref.current?.getBoundingClientRect()); setHov(true); } }}
         onMouseLeave={() => setHov(false)}
       >
         <PasteIcon />
       </button>
       {hov && rect && active && ReactDOM.createPortal(
-        <div style={{ position: 'fixed', top: rect.top - 28, left: rect.left + rect.width / 2, transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
+        <div style={{ position: 'fixed', bottom: window.innerHeight - rect.top + 6, left: rect.left + rect.width / 2, transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
           PASTE RULE GROUP
         </div>,
         document.body
@@ -1001,25 +1001,25 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <button
             onClick={onAddInterval}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: 'pointer', transition: 'all 0.12s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, height: 36, padding: '0 18px 0 13px', boxSizing: 'border-box', borderRadius: 8, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 11, fontWeight: 700, fontFamily: F, letterSpacing: 0.4, cursor: 'pointer', transition: 'all 0.12s' }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,90,130,0.7)'}
             onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,70,102,0.55)'}
           >
-            <PlusIcon /> ADD INTERVAL
+            <PlusIcon /> INTERVAL
           </button>
           {/* Gear button */}
           <button
             ref={gearRef}
             onClick={() => setRulesOpen(o => !o)}
-            onMouseEnter={e => { setGearRect(gearRef.current?.getBoundingClientRect()); setGearHov(true); e.currentTarget.style.borderColor = '#28779c'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.background = 'rgba(0,70,102,0.3)'; }}
-            onMouseLeave={e => { setGearHov(false); if (!rulesOpen) { e.currentTarget.style.borderColor = 'rgba(21,63,83,0.8)'; e.currentTarget.style.color = 'rgba(128,176,200,0.55)'; e.currentTarget.style.background = 'transparent'; } }}
-            style={{ width: 24, height: 24, borderRadius: 6, border: rulesOpen ? '1px solid #28779c' : '1px solid rgba(21,63,83,0.8)', background: rulesOpen ? 'rgba(0,70,102,0.4)' : 'transparent', color: rulesOpen ? '#ffffff' : 'rgba(128,176,200,0.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, transition: 'all 0.12s' }}
+            onMouseEnter={e => { setGearRect(gearRef.current?.getBoundingClientRect()); setGearHov(true); if (!rulesOpen) { e.currentTarget.style.background = 'rgba(0,90,130,0.7)'; } }}
+            onMouseLeave={e => { setGearHov(false); if (!rulesOpen) { e.currentTarget.style.background = 'rgba(0,70,102,0.55)'; } }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 36, padding: '0 12px', boxSizing: 'border-box', borderRadius: 8, border: '1px solid #28779c', background: rulesOpen ? 'rgba(0,90,130,0.7)' : 'rgba(0,70,102,0.55)', color: '#ffffff', cursor: 'pointer', transition: 'all 0.12s', fontSize: 11, fontFamily: F }}
           >
             <GearIcon />
           </button>
           {gearHov && gearRect && ReactDOM.createPortal(
-            <div style={{ position: 'fixed', top: gearRect.bottom + 6, left: gearRect.left + gearRect.width / 2, transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
-              Intervals thresholds
+            <div style={{ position: 'fixed', bottom: window.innerHeight - gearRect.top + 6, left: gearRect.left + gearRect.width / 2, transform: 'translateX(-50%)', background: '#012d42', border: '1px solid #153f53', borderRadius: 6, padding: '3px 8px', whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none', fontSize: 9, fontWeight: 700, color: 'rgba(204,223,233,0.9)', fontFamily: F, letterSpacing: 0.5 }}>
+              Thresholds
             </div>,
             document.body
           )}
@@ -1049,30 +1049,32 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {[...intervals].sort((a, b) => (b.isUngrouped ? 1 : 0) - (a.isUngrouped ? 1 : 0)).map(interval => {
-            const isActive = selIntervalId === interval.id;
-            const vCount = intervalVehicles[interval.id] ?? 0;
-            return (
-              <div
-                key={interval.id}
-                onClick={() => setSelIntervalId(interval.id)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 8, cursor: 'pointer', background: isActive ? 'rgba(0,65,96,0.7)' : 'rgba(0,45,68,0.4)', border: isActive ? '1px solid #28779c' : '1px solid rgba(21,63,83,0.6)', transition: 'background 0.12s, border-color 0.12s', animation: 'wiz-item-in 0.22s ease' }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(0,55,80,0.5)'; }}
-                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'rgba(0,45,68,0.4)'; }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, fontFamily: F, color: isActive ? '#ffffff' : 'rgba(204,223,233,0.75)' }}>{interval.name}</div>
-                  <div style={{ fontSize: 9, fontWeight: 500, fontFamily: F, color: isActive ? 'rgba(128,210,230,0.7)' : 'rgba(128,176,200,0.45)', marginTop: 2 }}>
-                    {vCount.toLocaleString()} vehicles
+        <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+          <div style={{ position: 'absolute', inset: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4, paddingRight: 5 }}>
+            {[...intervals].sort((a, b) => (b.isUngrouped ? 1 : 0) - (a.isUngrouped ? 1 : 0)).map(interval => {
+              const isActive = selIntervalId === interval.id;
+              const vCount = intervalVehicles[interval.id] ?? 0;
+              return (
+                <div
+                  key={interval.id}
+                  onClick={() => setSelIntervalId(interval.id)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 8, cursor: 'pointer', background: isActive ? 'rgba(0,65,96,0.7)' : 'rgba(0,45,68,0.4)', border: isActive ? '1px solid #28779c' : '1px solid rgba(21,63,83,0.6)', transition: 'background 0.12s, border-color 0.12s', animation: 'wiz-item-in 0.22s ease' }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(0,55,80,0.5)'; }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'rgba(0,45,68,0.4)'; }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, fontFamily: F, color: isActive ? '#ffffff' : 'rgba(204,223,233,0.75)' }}>{interval.name}</div>
+                    <div style={{ fontSize: 9, fontWeight: 500, fontFamily: F, color: isActive ? 'rgba(128,210,230,0.7)' : 'rgba(128,176,200,0.45)', marginTop: 2 }}>
+                      {vCount.toLocaleString()} vehicles
+                    </div>
                   </div>
+                  {!interval.fixed && (
+                    <RemoveBtn onConfirm={() => onRemoveInterval(interval.id)} label="Remove interval?" />
+                  )}
                 </div>
-                {!interval.fixed && (
-                  <RemoveBtn onConfirm={() => onRemoveInterval(interval.id)} label="Remove interval?" />
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -1081,11 +1083,11 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           <button
             onClick={onAddFilterGroup}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: 'pointer', transition: 'all 0.12s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, height: 36, padding: '0 18px 0 13px', boxSizing: 'border-box', borderRadius: 8, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 11, fontWeight: 700, fontFamily: F, letterSpacing: 0.4, cursor: 'pointer', transition: 'all 0.12s' }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,90,130,0.7)'}
             onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,70,102,0.55)'}
           >
-            <PlusIcon /> ADD RULES GROUP
+            <PlusIcon /> RULES GROUP
           </button>
           <PasteGroupBtn copied={copiedRuleGroup} onPaste={() => { onPasteFilterGroup(copiedRuleGroup); }} />
         </div>
@@ -1093,7 +1095,7 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingRight: 2 }}>
           {currentFilterGroups.length === 0 && (
             <div style={{ padding: '12px 14px', borderRadius: 10, background: 'rgba(0,50,80,0.18)', border: '1px solid rgba(40,119,156,0.22)', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', flexShrink: 0 }}>
-              <div style={{ fontSize: 10, fontWeight: 500, color: 'rgba(128,176,200,0.45)', fontFamily: F, lineHeight: 1.5 }}>Click <span style={{ color: 'rgba(128,190,220,0.65)', fontWeight: 700 }}>ADD RULES GROUP</span> to start defining vehicle filters for this interval.</div>
+              <div style={{ fontSize: 10, fontWeight: 500, color: 'rgba(128,176,200,0.45)', fontFamily: F, lineHeight: 1.5 }}>Click <span style={{ color: 'rgba(128,190,220,0.65)', fontWeight: 700 }}>RULES GROUP</span> to start defining vehicle filters for this interval.</div>
             </div>
           )}
           {currentFilterGroups.map((fg, fgi) => (
@@ -1137,7 +1139,7 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
         <button
           onClick={handleRecalculate}
           disabled={recalculating}
-          style={{ padding: '3px 8px', borderRadius: 6, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 10, fontWeight: 700, fontFamily: F, cursor: recalculating ? 'default' : 'pointer', transition: 'all 0.12s', alignSelf: 'flex-start', position: 'relative' }}
+          style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid #28779c', background: 'rgba(0,70,102,0.55)', color: '#ffffff', fontSize: 11, fontWeight: 700, fontFamily: F, letterSpacing: 0.4, cursor: recalculating ? 'default' : 'pointer', transition: 'all 0.12s', alignSelf: 'flex-start', position: 'relative' }}
           onMouseEnter={e => { if (!recalculating) e.currentTarget.style.background = 'rgba(0,90,130,0.7)'; }}
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,70,102,0.55)'}
         >
@@ -1152,8 +1154,8 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid rgba(21,63,83,0.7)', background: 'rgba(1,38,58,0.6)', flexShrink: 0, padding: '7px 10px' }}>
             <div style={{ width: 18, flexShrink: 0 }} />
-            <div style={{ flex: 1, fontSize: 8, fontWeight: 700, color: 'rgba(128,176,200,0.5)', letterSpacing: 0.7, fontFamily: F }}>INTERVAL</div>
-            <div style={{ width: 72, flexShrink: 0, fontSize: 8, fontWeight: 700, color: 'rgba(128,176,200,0.5)', letterSpacing: 0.7, fontFamily: F, textAlign: 'right' }}>VEHICLES</div>
+            <div style={{ flex: 1, fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.55)', letterSpacing: 0.8, fontFamily: F }}>INTERVAL</div>
+            <div style={{ width: 72, flexShrink: 0, fontSize: 9, fontWeight: 700, color: 'rgba(128,176,200,0.55)', letterSpacing: 0.8, fontFamily: F, textAlign: 'right' }}>VEHICLES</div>
           </div>
           <div style={{ flex: 1, overflowY: 'auto' }}>
             {[...intervals].sort((a, b) => (b.isUngrouped ? 1 : 0) - (a.isUngrouped ? 1 : 0)).map((interval, i) => {
@@ -1179,13 +1181,15 @@ function Step2({ intervals, selIntervalId, setSelIntervalId, rules, setRules, cu
                     <div style={{ width: 72, flexShrink: 0, fontSize: 11, fontWeight: 600, fontFamily: F, color: '#ffffff', textAlign: 'right' }}>{vCount.toLocaleString('de-DE')}</div>
                   </div>
                   {/* Country sub-rows */}
-                  {isExpanded && countries.map((row, ci) => (
-                    <div key={ci} style={{ display: 'flex', alignItems: 'center', padding: '5px 10px', background: 'rgba(0,20,34,0.55)', borderBottom: '1px solid rgba(21,63,83,0.15)' }}>
-                      <div style={{ width: 18, flexShrink: 0 }} />
-                      <div style={{ flex: 1, fontSize: 10, fontWeight: 400, fontFamily: F, color: 'rgba(128,176,200,0.7)', paddingLeft: 4 }}>{row.country}</div>
-                      <div style={{ width: 72, flexShrink: 0, fontSize: 10, fontWeight: 500, fontFamily: F, color: 'rgba(204,223,233,0.75)', textAlign: 'right' }}>{row.count.toLocaleString('de-DE')}</div>
-                    </div>
-                  ))}
+                  <div style={{ overflow: 'hidden', maxHeight: isExpanded ? countries.length * 30 + 'px' : '0px', opacity: isExpanded ? 1 : 0, transition: 'max-height 0.2s ease, opacity 0.15s ease' }}>
+                    {countries.map((row, ci) => (
+                      <div key={ci} style={{ display: 'flex', alignItems: 'center', padding: '5px 10px', background: 'rgba(0,20,34,0.55)', borderBottom: '1px solid rgba(21,63,83,0.15)' }}>
+                        <div style={{ width: 18, flexShrink: 0 }} />
+                        <div style={{ flex: 1, fontSize: 10, fontWeight: 400, fontFamily: F, color: 'rgba(128,176,200,0.7)', paddingLeft: 4 }}>{row.country}</div>
+                        <div style={{ width: 72, flexShrink: 0, fontSize: 10, fontWeight: 500, fontFamily: F, color: 'rgba(204,223,233,0.75)', textAlign: 'right' }}>{row.count.toLocaleString('de-DE')}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             })}
