@@ -8,7 +8,7 @@ import './App.css';
 const defaultBrand = BRANDS.find(b => b.id === 'audi');
 
 const LOAD_STEPS = [
-  'Connecting to ITERU servers',
+  'Connecting to XOTA servers',
   'Fetching campaign data',
   'Loading vehicle fleet information',
   'Synchronizing update specifications',
@@ -34,7 +34,7 @@ function LoaderScreen({ step, visible, steps = LOAD_STEPS }) {
       gap: 36, pointerEvents: 'none',
     }}>
       <div style={{ textAlign: 'center', fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
-        <div style={{ fontSize: 24, letterSpacing: 0.5, color: '#ffffff' }}>ITERU</div>
+        <div style={{ fontSize: 24, letterSpacing: 0.5, color: '#ffffff' }}>XOTA</div>
         <div style={{ fontSize: 8, letterSpacing: 3.5, color: '#ccdfe9', opacity: 0.4, marginTop: 2 }}>PRO</div>
       </div>
       <div style={{
@@ -172,6 +172,7 @@ export default function App() {
   const [loginError, setLoginError] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [toastKey, setToastKey] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
 
   function handleBrandChange(newBrand) {
@@ -229,7 +230,7 @@ export default function App() {
         setLoggedIn(true);
         requestAnimationFrame(() => requestAnimationFrame(() => {
           setDashVisible(true);
-          setShowTutorial(true);
+          setShowWelcome(true);
         }));
       }, 3200);
     }, 380);
@@ -261,7 +262,14 @@ export default function App() {
     }
     return (
       <div style={{ opacity: dashVisible ? 1 : 0, transition: 'opacity 0.4s ease', width: '100%', height: '100%' }}>
-        <DashboardView activeBrand={activeBrand} onBrandChange={handleBrandChange} onLogout={handleLogout} showTutorial={showTutorial} onTutorialDone={() => setShowTutorial(false)} onShowGuide={() => setShowTutorial(true)} />
+        <DashboardView
+          activeBrand={activeBrand} onBrandChange={handleBrandChange} onLogout={handleLogout}
+          showWelcome={showWelcome}
+          onWelcomeDone={() => { setShowWelcome(false); setShowTutorial(true); }}
+          showTutorial={showTutorial}
+          onTutorialDone={() => setShowTutorial(false)}
+          onShowGuide={() => { setShowWelcome(false); setShowTutorial(true); }}
+        />
       </div>
     );
   }
@@ -280,7 +288,7 @@ export default function App() {
         padding: '32px 24px', gap: 32, textAlign: 'center',
       }}>
         <div style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
-          <div style={{ fontSize: 28, letterSpacing: 0.5, color: '#ffffff' }}>ITERU</div>
+          <div style={{ fontSize: 28, letterSpacing: 0.5, color: '#ffffff' }}>XOTA</div>
           <div style={{ fontSize: 14, letterSpacing: 5, color: '#ccdfe9', opacity: 0.5, marginTop: 2 }}>PRO</div>
         </div>
 
@@ -307,7 +315,7 @@ export default function App() {
             fontFamily: "'Inter', sans-serif", lineHeight: 1.6,
             maxWidth: 280,
           }}>
-            ITERU is designed for desktop use. Due to the complexity and density of the interface, mobile devices are not supported.
+            XOTA is designed for desktop use. Due to the complexity and density of the interface, mobile devices are not supported.
           </div>
           <div style={{
             fontSize: 12, fontWeight: 500, color: 'rgba(128,176,200,0.4)',
@@ -343,7 +351,7 @@ export default function App() {
       {/* Title */}
       <div style={{ textAlign: 'center', fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
         <div style={{ fontSize: 42.647, letterSpacing: 0.853, color: '#ffffff', lineHeight: 1.3 }}>
-          ITERU
+          XOTA
         </div>
         <div style={{ fontSize: 25.588, letterSpacing: 8.188, color: '#ccdfe9', opacity: 0.5, lineHeight: 1.3, paddingLeft: 8 }}>
           PRO

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="7" fill="#012d42"/>
+  <!-- Car body -->
+  <rect x="4" y="17" width="24" height="7" rx="2" fill="#28779c"/>
+  <!-- Cabin -->
+  <path d="M9 17 L11 11 L21 11 L23 17 Z" fill="#28a0c8"/>
+  <!-- Wheels -->
+  <circle cx="9" cy="24" r="3" fill="#001a28"/>
+  <circle cx="9" cy="24" r="1.5" fill="#28779c"/>
+  <circle cx="23" cy="24" r="3" fill="#001a28"/>
+  <circle cx="23" cy="24" r="1.5" fill="#28779c"/>
+  <!-- Windshield -->
+  <path d="M11.5 16.5 L13 12.5 L19 12.5 L20.5 16.5 Z" fill="#80c8e8" opacity="0.7"/>
+</svg>

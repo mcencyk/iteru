@@ -1528,7 +1528,7 @@ const NOTIF_RAW = [
   { id:30, type:'scheduled_update',                                         title:'Batch Import Completed',   desc:'VW batch January 2024 — 9 412 vehicles, 14 regions synchronized.',                                  time:'5 days ago',  detail:{ brand:'VW',     batch:'January 2024',    vehicles:'9 412', regions:['Germany','Austria','Poland','Czech Republic','+10 regions'],       fileRef:'vw_fleet_jan2024.xlsx',    ts:'2026-03-07 08:00' } },
   { id:31, type:'campaign_test_status',  status:'COMPLETED',                title:'Lab Campaign Completed',  desc:'ABS System Integration Test — 33 vehicles passed full validation.',                                   time:'5 days ago',  campaignId:105, campaignName:'ABS System Integration Test',       isTest:true  },
   { id:32, type:'campaign_status',       status:'RUNNING',                  title:'Campaign Started',         desc:'Southeast Asia Software Full began deployment on 754 vehicles.',                                     time:'5 days ago',  campaignId:17,  campaignName:'Southeast Asia Software Full',      isTest:false },
-  { id:33, type:'system',                                                   title:'Release Notes Available',  desc:'ITERU Pro v4.2 is available — batch import improvements, enhanced failure analytics.',                 time:'5 days ago'  },
+  { id:33, type:'system',                                                   title:'Release Notes Available',  desc:'XOTA Pro v4.2 is available — batch import improvements, enhanced failure analytics.',                 time:'5 days ago'  },
   { id:34, type:'scheduled_update',                                         title:'Data Synchronized',        desc:'Skoda Q1 fleet synchronized — 2 889 vehicles across 5 markets.',                                    time:'6 days ago',  detail:{ brand:'Skoda',  batch:'Q1 2024 (2nd sync)', vehicles:'2 889', regions:['Czech Republic','Slovakia','Poland','Hungary','Romania'],          fileRef:'skoda_q1_sync2.xlsx',      ts:'2026-03-06 15:30' } },
   { id:35, type:'campaign_status',       status:'COMPLETED',                title:'Campaign Completed',       desc:'South Korea Brake Module Fix — 2 067 vehicles, 100% success rate.',                                  time:'6 days ago',  campaignId:28,  campaignName:'South Korea Brake Module Fix',      isTest:false },
   { id:36, type:'campaign_test_status',  status:'FAILED',                   title:'Lab Campaign Failed',     desc:'Battery Management Pilot failed — BMS firmware incompatibility on 12 vehicles.',                    time:'7 days ago',  campaignId:110, campaignName:'Battery Management Pilot',          isTest:true  },
@@ -1874,7 +1874,7 @@ export default function Sidebar({ activeNav, onNavChange, attentionCount, testAt
             )}
           </div>
           <div style={{ textAlign: 'center', fontFamily: "'Montserrat', sans-serif", fontWeight: 700 }}>
-            <div style={{ fontSize: 13, letterSpacing: 0.3, color: '#ffffff', lineHeight: '16px' }}>ITERU</div>
+            <div style={{ fontSize: 13, letterSpacing: 0.3, color: '#ffffff', lineHeight: '16px' }}>XOTA</div>
             <div style={{ fontSize: 8, letterSpacing: 2.5, color: '#ccdfe9', opacity: 0.5, lineHeight: '12px' }}>PRO</div>
           </div>
         </div>

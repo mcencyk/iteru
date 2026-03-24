@@ -4,6 +4,7 @@ import CampaignDetailView from './CampaignDetailView';
 import TestUpdatesView from './TestUpdatesView';
 import NewCampaignWizard from './NewCampaignWizard';
 import TutorialOverlay from './TutorialOverlay';
+import WelcomeModal from './WelcomeModal';
 
 // ─── Status badge config ────────────────────────────────────────────────────
 const STATUS = {
@@ -1184,7 +1185,7 @@ function NewVariableModal({ onClose }) {
 }
 
 // ─── Main component ──────────────────────────────────────────────────────────
-export default function DashboardView({ activeBrand, onBrandChange, onLogout, showTutorial, onTutorialDone, onShowGuide }) {
+export default function DashboardView({ activeBrand, onBrandChange, onLogout, showWelcome, onWelcomeDone, showTutorial, onTutorialDone, onShowGuide }) {
   const [selectedVariable, setSelectedVariable] = useState(null);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [loadingCampaign, setLoadingCampaign] = useState(null);
@@ -1751,6 +1752,7 @@ export default function DashboardView({ activeBrand, onBrandChange, onLogout, sh
     </div>
     {addVariableOpen && <NewVariableModal onClose={() => setAddVariableOpen(false)} />}
     {newCampaignOpen && <NewCampaignWizard onClose={() => setNewCampaignOpen(false)} onSuccess={() => { setNewCampaignOpen(false); setCampaignCreatedToast(true); }} />}
+    {showWelcome && <WelcomeModal onStart={onWelcomeDone} />}
     {showTutorial && <TutorialOverlay onDone={onTutorialDone} />}
     {campaignCreatedToast && (
       <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 999, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 12, background: 'rgba(0,28,18,0.88)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(40,160,70,0.45)', boxShadow: '0 4px 16px rgba(0,0,0,0.32), 0 0 0 1px rgba(40,160,70,0.12)', animation: campaignToastHiding ? 'toastSlideOut 0.32s ease forwards' : 'toastSlideIn 0.28s ease forwards', maxWidth: 300, pointerEvents: 'none' }}>
